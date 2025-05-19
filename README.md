@@ -20,6 +20,7 @@
 
 ### 1.2 사용자 정의 프로젝트 구성
 - `docs` 라는 하위 폴더를 생성하고, `user_requirements.md`, `project_description.md`, `ProgressAndTOdo.md` 파일을 생성하고 관리해 주세요.
+- schemas 폴더를 관리하고 내부에 데이터 구조를 관리한다. 
 - 원격 또는 로컬 git 레포를 초기화
 
 ## 2. 진행 중인 프로젝트인 경우
