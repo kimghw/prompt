@@ -59,21 +59,21 @@ email-embedding/
 │   │   └── auth_service.py      # 인증 관련 비즈니스 로직
 │   ├── cli/                     # 어댑터 계층 (CLI)
 │   │   ├── __init__.py
-│   │   ├── email_cli.py
+│   │   ├── email_cli.py(not yet)
 │   │   ├── graphapi_cli.py
-│   │   └── db_cli.py
+│   │   └── db_cli.py(not yet)
 │   ├── api/                     # 어댑터 계층 (API)
 │   │   ├── __init__.py
 │   │   ├── email_api.py
 │   │   └── auth_api.py
 │   ├── schemas/                 # DTO/모델 계층
 │   │   ├── __init__.py
-│   │   ├── email.py
+│   │   ├── email.py(not yet)
 │   │   └── auth.py
 │   ├── infra/                   # 인프라 계층
 │   │   ├── __init__.py
 │   │   ├── graph_gateway.py     # Graph API 연동
-│   │   ├── db_repository.py     # 데이터베이스 연동
+│   │   ├── db_repository.py(not yet)     # 데이터베이스 연동
 │   │   ├── config.py
 │   │   ├── .token_cache.json    # (gitignore 권장)
 │   │   └── .delta_link.json     # (gitignore 권장)
