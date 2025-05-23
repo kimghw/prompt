@@ -18,9 +18,11 @@
 - **CLI**: Click
 - **비동기**: asyncio/await 기반
 - **데이터 모델**: Pydantic
-- **PDF 처리**: PyPDF 또는 유사 라이브러리
-- **임베딩**: OpenAI API , Sentence Transformers 또는 유사 라이브러리
+- **문서 로드 처리**: PyPDF 또는 유사 라이브러리
+- **청킹**:
+- **임베딩**: OpenAI API
 - **벡터 저장소**: Qdrant(HNSW), FAISS, Chroma
+- **질의 답변** : OpenAI API
 
 ## 4. 디렉터리 구조
 ```
@@ -69,8 +71,8 @@ project/
    - 요구사항 : 문서 ID, 메타데이터
 
 6. **리트리버**
-   - 사용 : 
-   - 추가 고려: MultiVectorRetriever ,MultiQueryRetriever, ParentDocumentRetriever, vectorstore.as_retriever(search_type="mmr"), MultiQueryRetriever,ContextualCompressionRetriever, SelfQueryRetriever
+   - 사용 : MultiVectorRetriever
+   - 추가 고려: MultiQueryRetriever, ParentDocumentRetriever, vectorstore.as_retriever(search_type="mmr"), MultiQueryRetriever,ContextualCompressionRetriever, SelfQueryRetriever
    - 요구사항 : 문서 ID, 메타데이터
 
 2. **API 데이터 업로드 & 처리**
