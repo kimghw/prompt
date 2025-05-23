@@ -1,1 +1,126 @@
-dd
+
+# 사용자 요구사항
+
+## 1. 배경 및 큰 그림
+- **프로젝트명**: Document Embedding & Retrieval System
+- **목적**: PDF 문서 처리, 외부 API 데이터 수집, 벡터 임베딩 기반 문서 검색 시스템 구축
+- **핵심 가치**: 멀티 인터페이스 지원(API, CLI)과 확장 가능한 아키텍처
+
+## 2. 모듈 분할 기준
+- **CORE 모듈**: 비즈니스 로직, 엔티티, 유스케이스 (외부 의존성 없음)
+- **PORTS**: 인터페이스/추상 클래스 정의
+- **ADAPTERS**: 외부 시스템 연동 구현체 (DB, API, 파일 I/O)
+- **INTERFACES**: FastAPI 라우터, CLI 명령어 (얇은 어댑터)
+
+## 3. 언어 및 라이브러리
+- **언어**: Python 3.12+
+- **웹 프레임워크**: FastAPI
+- **CLI**: Click
+- **비동기**: asyncio/await 기반
+- **데이터 모델**: Pydantic
+- **PDF 처리**: PyPDF 또는 유사 라이브러리
+- **임베딩**: OpenAI API , Sentence Transformers 또는 유사 라이브러리
+- **벡터 저장소**: Qdrant(HNSW), FAISS, Chroma
+
+## 4. 디렉터리 구조
+```
+project/
+├── core/
+│   ├── entities/          # 도메인 엔티티
+│   ├── ports/            # 인터페이스 정의
+│   └── usecases/         # 비즈니스 로직
+│   └── services/         # 서비스 로직
+├── adapters/
+│   ├── db/               # 데이터베이스 어댑터
+│   ├── external_api/     # 외부 API 어댑터
+│   ├── pdf/              # PDF 처리 어댑터
+│   ├── embedding/        # 임베딩 어댑터
+│   └── vector_store/     # 벡터 저장소 어댑터
+│   └── Graph_api         # Email 수집 어딥터
+├── interfaces/
+│   ├── api/              # FastAPI 라우터
+│   └── cli/              # CLI 명령어
+├── schemas/              # Pydantic 모델
+├── tests/                # 테스트 코드
+└── docs/                 # 문서
+```
+
+## 5. 모듈별 코드 요구사항
+   - 모듈에 어떤 알고리즘을 사용할 지는 cli나 api를 이용해서 선택 할 수 있게 구성
+### 5.1 Atomic 유스케이스
+1. **문서 로더(Loader) 모듈**
+   - 사용 : PyPDF, PyMuPDF, JSONLoader
+   - 추가 고려 : UnstructuredPDFLoader, TextLoader, WebBaseLoader
+   - 요구사항 : 문서 로더를 어러 개 사용할 예정이기에 필요시 인터페이스, DI, 어댑터 적용
+
+2. **텍스트 청킹 전략**
+   - 사용: SemanticChunker
+   - 추가 고려: RecursiveCharacterTextSplitter(일반 텍스트), MarkdownTextSplitter(특정 형식의 Markdown 문서 존재 시)
+   - 요구사항 : 문서 ID, 메타데이터
+
+3. **임베딩 모델**
+   - 사용 : OpenAIEmbeddings (text-embedding-3-small)
+   - 추가 고려: HuggingFaceBgeEmbeddings (BAAI/bge-small-en-v1.5)
+   - 요구사항 : 문서 ID, 메타데이터
+
+5. **벡터 저장 및 인덱스**
+   - 사용 : Qdrant
+   - 추가 고려: Pinecone(설치안함), FAISS, ChromaDB(설치안함)
+   - 요구사항 : 문서 ID, 메타데이터
+
+6. **리트리버**
+   - 사용 : 
+   - 추가 고려: MultiVectorRetriever ,MultiQueryRetriever, ParentDocumentRetriever, vectorstore.as_retriever(search_type="mmr"), MultiQueryRetriever,ContextualCompressionRetriever, SelfQueryRetriever
+   - 요구사항 : 문서 ID, 메타데이터
+
+2. **API 데이터 업로드 & 처리**
+   - 사용 : OpenAIEmbeddings (text-embedding-3-small)
+   - 추가 고려: HuggingFaceBgeEmbeddings (BAAI/bge-small-en-v1.5)
+   - 요구사항 : 문서 ID, 메타데이터
+
+### 5.2 Composit 유스케이스/서비스
+1. **벡터 DB 저장**
+   - 문서 업로드, 청킹, 임베딩, 벡터 DB 저장
+   - 각 모듈 다른 모듈로 변경 가능
+
+2. **질의**
+   - 질의, 임베딩, 유사도 검색, 관련 청크들 반환
+   - 각 모듈 다른 모듈로 변경 가능
+
+3. **답변생성(진행하지 않음)**
+   - 청크 + 질의, LLM 답변 생성
+   - 각 모듈 다른 모듈로 변경 가능
+
+4. **질의 + 답변생성**
+
+### 5.2 포트 인터페이스
+- `PDFReaderPort`: PDF 텍스트 추출
+- `ExternalAPIClientPort`: 외부 API 호출
+- `DocumentRepositoryPort`: 문서 CRUD
+- `EmbeddingPort`: 임베딩 생성
+- `VectorStorePort`: 벡터 저장/검색
+
+### 5.3 엔티티 설계
+- `Document`: 문서 정보 (ID, 제목, 본문, 메타데이터)
+- `Embedding`: 임베딩 벡터 정보
+- `SearchResult`: 검색 결과
+
+## 6. 테스트/예시 코드
+- 각 유스케이스별 단위 테스트
+- 통합 테스트 (API 엔드포인트)
+- CLI 명령어 테스트
+- 모킹을 통한 외부 의존성 테스트
+
+## 7. 추가 및 수정
+- 동일 기능의 비즈니스 로직 참조 후 동일한 포트 적용
+- 동일 기능의 외부 라이브러리 또는 API의 경우 동일 어답터 적용
+
+## 8. 종합 요약
+포트/어댑터 패턴을 적용한 클린 아키텍처로 Document Embedding & Retrieval System을 구축합니다. CORE 로직의 독립성을 보장하고, 멀티 인터페이스(API/CLI)를 지원하며, 비동기 처리를 통해 확장 가능한 시스템을 개발합니다.
+
+
+
+
+
+
+. 기능 또는 추가시
