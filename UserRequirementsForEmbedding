@@ -19,7 +19,7 @@
 - **비동기**: asyncio/await 기반
 - **데이터 모델**: Pydantic
 - **문서 로드 처리**: PyPDF 또는 유사 라이브러리
-- **청킹**:
+- **청킹**: SemanticChunker
 - **임베딩**: OpenAI API
 - **벡터 저장소**: Qdrant(HNSW), FAISS, Chroma
 - **질의 답변** : OpenAI API
@@ -96,16 +96,23 @@ project/
 4. **질의 + 답변생성**
 
 ### 5.2 포트 인터페이스
-- `PDFReaderPort`: PDF 텍스트 추출
-- `ExternalAPIClientPort`: 외부 API 호출
-- `DocumentRepositoryPort`: 문서 CRUD
-- `EmbeddingPort`: 임베딩 생성
-- `VectorStorePort`: 벡터 저장/검색
+- `DocumentLoaderPort`: PDF/JSON/웹 등 원본 문서를 로딩
+- `TextChunkerPort`: 문서 텍스트를 청크 단위로 쪼개는 로직
+- `EmbeddingModelPort`: OpenAI/HuggingFace 등 임베딩 모델 호출
+- `VectorStorePort`: Qdrant/Faiss/Chroma 등 벡터 DB 입출력
+- `RetrieverPort`: 한 단계 추상화된 “검색” 인터페이스(MultiQueryRetriever 등)
+- `AnswerGeneratorPort`: LLM 등으로 최종 답변 생성(현재는 진행 안 함)
 
 ### 5.3 엔티티 설계
 - `Document`: 문서 정보 (ID, 제목, 본문, 메타데이터)
+- 'DocumentChunk' : 분서 분할
 - `Embedding`: 임베딩 벡터 정보
-- `SearchResult`: 검색 결과
+- `RetrievalResult`: 검색 결과
+- 'GenerateAnswer' : 답변생성(진행하지 않음)
+
+### 5.4  Adapters
+- 실제 구현체: 예) PdfLoaderAdapter, QdrantVectorStoreAdapter, OpenAIEmbeddingAdapter 등
+- Ports를 구현하여 DocumentLoaderPort, EmbeddingModelPort 등을 만족
 
 ## 6. 테스트/예시 코드
 - 각 유스케이스별 단위 테스트
