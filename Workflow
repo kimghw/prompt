@@ -1,0 +1,52 @@
+## 작업 순서 요약 ##
+1. 도메인 설계 & CORE 뼈대 → 2. CORE 유닛테스트(Mocks) →
+
+2. 각 포트(어댑터) 최소 기능 구현 → 4. FastAPI/CLI 같은 Entry Point 연결 →
+
+3. 외부 API 연동 → 6. 로깅/예외 처리/추가 기능 보강 → 7. 배포/문서화/유지보수
+
+## 작업 순서 세부 사항 ##
+
+steps:
+  - name: "프로젝트 뼈대 & 도메인 모델 설계"
+    tasks:
+      - "프로젝트 디렉토리 구조 확정 (my_project/core, adapters, tests, main.py 등)"
+      - "도메인 엔티티(Entities) 정의 (Document, Embedding, Metadata 등)"
+      - "포트(Ports) 인터페이스 초안 작성 (PDFReaderPort, EmbeddingPort, etc.)"
+      - "유스케이스(Usecases) 구조 설계 (ProcessPDFUseCase, SearchDocumentsUseCase 등)"
+    goal: "뼈대 및 핵심 로직 인터페이스 확정 (구현 X, Mock/Stubs로 대체 가능)"
+
+  - name: "CORE 로직(Unit Tests) + Mock/Stubs"
+    tasks:
+      - "유스케이스 단위 테스트 (포트는 Mock/Stubs 사용)"
+      - "엔티티 검증 로직 테스트 (예: Document 엔티티 유효성)"
+    goal: "CORE가 구체 구현 없이도 정상 동작/테스트 가능하게 함"
+
+  - name: "최소 어댑터(구현체) 연결"
+    tasks:
+      - "DB Repository 어댑터 구현 (SQLAlchemy 등), DB CRUD 통합 테스트"
+      - "PDFReaderPort 구현 (PyPDF2 등), PDF 샘플 테스트"
+      - "EmbeddingPort 구현 (OpenAI/HuggingFace), API Key 관리"
+      - "VectorStorePort 구현 (Faiss, Pinecone 등), 검색 로직 테스트"
+    goal: "핵심 기능(DB+PDF+임베딩+검색) 연결 후 통합 테스트"
+
+  - name: "FastAPI / CLI 진입점 구성"
+    tasks:
+      - "FastAPI 라우터 구성 (예: /process-pdf, /search)"
+      - "CLI 스크립트 구성 (click/argparse)"
+      - "의존성 주입(Dependency Injection) 정리 (Depends, 팩토리 함수)"
+    goal: "API/CLI로 CORE 유스케이스 동작하는 MVP 완성"
+
+  - name: "외부 API 연동 (필요 시)"
+    tasks:
+      - "ExternalAPIClientPort 구현 (requests/httpx)"
+      - "데이터 수집 Use Case (FetchExternalDataUseCase) 연동"
+      - "실제 또는 Mock 서버 통합 테스트"
+    goal: "외부 API 데이터 연동 및 저장 로직 안정화"
+
+  - name: "로깅 & 예외 처리 & 추가 기능 보강"
+    tasks:
+      - "공통 로깅 설정 (logging, structlog)"
+      - "도메인 예외 정의 & 어댑터 예외 핸들링 (HTTPException, CLI 에러)"
+      - "추가 기능 (통계, 메시지 큐, 백그라운드 작업 등)"
+    goal: "MVP를 운영 가능 수준으로 고도화"
