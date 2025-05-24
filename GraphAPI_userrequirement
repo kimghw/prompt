@@ -1,174 +1,693 @@
-# 사용자 요구사항
+# 사용자 요구사항 문서 (YAML)
+# 작성 가이드: 각 섹션의 설명을 참고하여 작성하세요
 
-## 1. 배경 및 큰 그림
+project:
+  name: "프로젝트명"
+  version: "1.0.0"
+  created_date: "2024-01-01"
+  last_modified: "2024-01-01"
+  authors:
+    - name: "작성자명"
+      role: "역할"
+      email: "email@example.com"
 
-Microsoft Graph API를 활용하여 이메일을 관리하는 도구를 개발합니다. 이 도구는 CLI(명령줄 인터페이스)를 통해 Microsoft Graph API로부터 이메일을 가져오고, 로컬 데이터베이스에 저장하며, 이메일을 발송하는 기능을 제공합니다.
-
-아키텍쳐 디자인으로 구성한다. 
-
-이 도구는 다음과 같은 사용자의 요구를 충족합니다:
-- Microsoft Graph API를 통한 이메일 관리
-- 인증 토큰 관리 및 갱신
-- 이메일 데이터의 로컬 저장 및 관리
-- 사용자 친화적인 명령줄 인터페이스
-
-## 2. 모듈 분할 기준
-
-프로젝트는 클린 아키텍처 패턴을 기반으로 다음과 같이 계층을 분할합니다:
-
-1. **도메인/서비스 계층**: 핵심 비즈니스 로직을 포함하는 계층 (API/CLI가 없어도 동작 가능)
-2. **어댑터 계층**: 외부 요청을 처리하는 계층 (CLI, API 인터페이스)
-3. **DTO/모델 계층**: 데이터 전송 객체 및 모델 정의
-4. **인프라 계층**: 외부 시스템 연동 계층 (Microsoft Graph API, 데이터베이스)
-5. **유틸리티 계층**: 로깅, 예외 처리 등 공통 기능 제공
-
-각 계층은 명확한 책임을 가지며, 내부 계층은 외부 계층에 의존하지 않습니다.
-
-모듈은 각각 독립적으로 동작하며, 모듈 간의 의존성을 최소화하여 유지보수성을 높입니다.
-
-## 3. 언어 및 라이브러리
-
-- **프로그래밍 언어**: Python 3.7 이상
-- **주요 라이브러리**:
-  - `requests`: HTTP 요청 처리
-  - `msal`: Microsoft Authentication Library
-  - `click`: CLI 인터페이스 구축
-  - `rich`: 콘솔 출력 서식
-  - `sqlite3`: 로컬 데이터베이스
-  - `python-dotenv`: 환경 변수 관리
-
-## 4. 디렉터리 구조
-
-```
-email-embedding/
-├── .gitignore
-├── README.md
-├── requirements.txt
-├── pyproject.toml               # 또는 setup.py, poetry 등의 설정 파일
-├── docs/
-│   ├── user_requirements.md
-│   ├── project_description.md
-│   └── ProgressAndTOdo.md
-├── logs/
-│   └── app.log
-├── src/
-│   ├── __init__.py
-│   ├── services/                # 도메인/비즈니스 로직 계층
-│   │   ├── __init__.py
-│   │   ├── email_service.py     # 이메일 관련 비즈니스 로직
-│   │   └── auth_service.py      # 인증 관련 비즈니스 로직
-│   ├── cli/                     # 어댑터 계층 (CLI)
-│   │   ├── __init__.py
-│   │   ├── email_cli.py(not yet)
-│   │   ├── graphapi_cli.py
-│   │   └── db_cli.py(not yet)
-│   ├── api/                     # 어댑터 계층 (API)
-│   │   ├── __init__.py
-│   │   ├── email_api.py
-│   │   └── auth_api.py
-│   ├── schemas/                 # DTO/모델 계층
-│   │   ├── __init__.py
-│   │   ├── email.py(not yet)
-│   │   └── auth.py
-│   ├── infra/                   # 인프라 계층
-│   │   ├── __init__.py
-│   │   ├── graph_gateway.py     # Graph API 연동
-│   │   ├── db_repository.py(not yet)     # 데이터베이스 연동
-│   │   ├── config.py
-│   │   ├── .token_cache.json    # (gitignore 권장)
-│   │   └── .delta_link.json     # (gitignore 권장)
-│   ├── utils/                   # 유틸리티 계층
-│   │   ├── __init__.py
-│   │   ├── logging_config.py
-│   │   └── exceptions.py
-```
-
-**[NOTE] 현재 프로젝트 구조는 기존의 모듈 기반 구조이며, 점진적으로 클린 아키텍처 패턴으로 전환할 예정입니다.**
-
-## 5. 모듈별 코드 요구사항
-
-### 5.1 Graph API 모듈
-
-#### auth_token.py
-- Microsoft Graph API 인증 처리
-- 토큰 캐시 및 갱신 기능
-- 인증 상태 확인 기능
-
-**[NOTE] 인증 구현 시 주의사항:**
-- **인증 코드 흐름(Authorization Code Flow) 구현 시 스코프 설정 주의**:
-  - `openid`, `offline_access`, `profile`과 같은 예약된 스코프는 MSAL 라이브러리에서 자동으로 추가됨
-  - 이러한 예약된 스코프를 명시적으로 지정하면 에러 발생 가능: 
-    `"You cannot use any scope value that is reserved."`
-  - 해결책: Graph API 관련 스코프만 명시적으로 지정하고 예약된 스코프는 제외
+# 1. 프로젝트 개요
+overview:
+  background: |
+    현재 상황과 문제점을 구체적으로 기술
+    여러 줄로 작성 가능
   
-- **브라우저 인증 흐름 구현 시 고려사항**:
-  - 리디렉션 URI와 콜백 처리를 위한 로컬 서버 필요
-  - 사용자 인터랙션 개선을 위한 브라우저 자동 실행 기능 추가 필요
-  - 인증 코드 수신 후 처리 로직 필요
+  objectives:
+    - "목표 1: 구체적인 달성 목표"
+    - "목표 2: 측정 가능한 성과 지표"
   
-- **토큰 상태 모니터링**:
-  - 토큰 자동 갱신 메커니즘 구현 필요
-  - 캐시된 토큰과 메모리 내 토큰 상태 일치화 필요
+  core_values:
+    - value: "확장성"
+      description: "새로운 기능을 쉽게 추가할 수 있는 구조"
+    - value: "성능"
+      description: "대용량 데이터 처리 최적화"
+  
+  target_users:
+    - type: "개발자"
+      needs: ["API 문서", "SDK", "샘플 코드"]
+    - type: "일반 사용자"
+      needs: ["직관적인 UI", "빠른 응답속도"]
 
-#### config.py
-- API 설정 관리
-- `.env` 파일에서 설정 로드
-- 기본 설정값 제공
+# 2. 프로젝트 범위
+scope:
+  included:
+    - "PDF 문서 처리 및 변환"
+    - "RESTful API 제공"
+    - "사용자 인증 및 권한 관리"
+    - "Microsoft Graph API를 통한 이메일 수집 및 동기화"  # 추가/수정
+  excluded:
+    - "실시간 스트리밍 처리"
+    - "모바일 앱 개발"
+  phases:
+    - phase: "MVP"
+      duration: "2개월"
+      features:
+        - "기본 문서 업로드"
+        - "텍스트 추출"
+        - "기본 검색"
+    - phase: "Phase 1"
+      duration: "3개월"
+      features:
+        - "고급 검색 기능"
+        - "벡터 임베딩"
+        - "API 인증 (Authorization Code Flow)"  # 주석 추가
+    - phase: "Phase 2"
+      duration: "3개월"
+      features:
+        - "웹 UI"
+        - "실시간 처리"
+        - "다국어 지원"
 
-#### API 수신 직 후 데이터 사전처리
-- 수신 데이터 사전처리 후 사용
-  - content가 html 인 경우 text 변환
-  - 필터링 기능(보낸 사람ID, 보낸 사람), 초기에는 `block@krs.co.kr`, `Administrator`
-  - 필터링 항목 추가 함수 구현(보낸 사람 이름 필터, 보낸 사람 이메일 필터)
-  - 송신 메일에는 `sentDateTime` 필드가 있으나 수신 메일에는 `receivedDateTime` 필드 사용 함으로 2개 모두 갖을 수 있음
+# 3. 기술 스택
+technology_stack:
+  languages:
+    - name: "Python"
+      version: "3.12+"
+      reason: "비동기 처리 및 AI/ML 라이브러리 생태계"
+  
+  frameworks:
+    backend:
+      - name: "FastAPI"
+        version: "0.104.1"
+        purpose: "REST API 서버"
+        reason: "고성능 비동기 처리, 자동 문서화"
+    
+    cli:
+      - name: "Click"
+        version: "8.1.7"
+        purpose: "CLI 인터페이스"
+        reason: "직관적인 명령어 구조"
+  
+  databases:
+    primary:
+      type: "PostgreSQL"
+      version: "15.0"
+      purpose: "메타데이터 저장"
+    vector_store:
+      type: "Qdrant"
+      version: "1.7.0"
+      purpose: "벡터 임베딩 저장 및 검색"
+    cache:
+      type: "Redis"
+      version: "7.0"
+      purpose: "캐싱 및 세션 관리"
+  
+  external_services:
+    - name: "OpenAI API"
+      purpose: "텍스트 임베딩 생성"
+      api_version: "v1"
+      pricing_model: "pay-per-use"
+    - name: "AWS S3"
+      purpose: "문서 파일 저장"
+      region: "ap-northeast-2"
+    - name: "Microsoft Graph API"
+      purpose: "Microsoft 365 메일 데이터 수집"
+      api_version: "v1.0"
+      authentication: "OAuth 2.0 (Delegated Permissions, Authorization Code Flow)"  # 변경
+      relevant_endpoints:
+        - "/me/messages"
+        - "/me/mailFolders"
+      notes: "Delta Query(델타 링크)를 이용한 증분 동기화 지원"
 
-#### get_emails.py
-- 이메일 검색 기능
-- 송수신 메일 관련 기능
-  - 기간별 수신 메일 데이터 갖어오기
-  - 기간별 송신 메일 데이터 갖어오기
-  - 기간별 송수신 메일 모두 갖어오기
-  - 최근 데이터 갖어온 이후 데이터 갖어오기
+# 4. 아키텍처
+architecture:
+  patterns:
+    - name: "Clean Architecture"
+      reason: "비즈니스 로직과 외부 의존성 분리"
+    - name: "Port/Adapter Pattern"
+      reason: "유연한 외부 시스템 연동"
+  
+  principles:
+    - "SOLID"
+    - "DRY (Don't Repeat Yourself)"
+    - "YAGNI (You Aren't Gonna Need It)"
+  
+  modules:
+    core:
+      description: "비즈니스 로직 (외부 의존성 없음)"
+      submodules:
+        - "entities"
+        - "usecases"
+        - "ports"
+    adapters:
+      description: "외부 시스템 연동 구현체"
+      submodules:
+        - "database"
+        - "external_api"
+        - "file_storage"
+    interfaces:
+      description: "진입점 (API, CLI)"
+      submodules:
+        - "rest_api"
+        - "cli_commands"
 
+# 5. 기능 요구사항
+functional_requirements:
+  core_features:
+    - id: "F001"
+      name: "문서 업로드"
+      description: "다양한 형식의 문서를 시스템에 업로드"
+      priority: "필수"
+      status: "구현완료"
+      input:
+        - type: "multipart/form-data"
+          fields:
+            - name: "file"
+              type: "File"
+              formats: ["PDF", "DOCX", "TXT"]
+              max_size: "50MB"
+      output:
+        - type: "JSON"
+          schema:
+            document_id: "string"
+            status: "string"
+            metadata: "object"
+      processing_steps:
+        - "파일 유효성 검증"
+        - "바이러스 스캔"
+        - "파일 저장"
+        - "메타데이터 추출"
+      technologies:
+        libraries:
+          - name: "PyPDF2"
+            version: "3.0.0"
+            purpose: "PDF 파일 처리"
+          - name: "pdfplumber"
+            version: "0.10.0"
+            purpose: "PDF 텍스트 추출"
+        apis:
+          - name: "Google Cloud Vision API"
+            purpose: "OCR 처리"
+      performance:
+        response_time: "< 5초 (10MB 파일 기준)"
+        throughput: "100 requests/minute"
+        concurrent_users: 50
+    
+    - id: "F002"
+      name: "텍스트 청킹"
+      description: "문서를 의미 있는 단위로 분할"
+      priority: "필수"
+      status: "구현완료"
+      input:
+        - type: "Document"
+          fields:
+            - name: "content"
+              type: "string"
+            - name: "document_id"
+              type: "string"
+      output:
+        - type: "List[Chunk]"
+          schema:
+            chunk_id: "string"
+            content: "string"
+            metadata: "object"
+      processing_steps:
+        - "문서 구조 분석"
+        - "청킹 전략 선택"
+        - "청크 생성"
+        - "메타데이터 추가"
+      technologies:
+        libraries:
+          - name: "LangChain"
+            version: "0.0.350"
+            purpose: "텍스트 분할"
+          - name: "NLTK"
+            version: "3.8.1"
+            purpose: "문장 분할"
+        apis:
+          - name: "OpenAI API"
+            purpose: "의미적 청킹"
+      configuration:
+        chunk_size: 1000
+        chunk_overlap: 200
+        separators: ["\n\n", "\n", " ", ""]
+    
+    - id: "F003"
+      name: "벡터 임베딩 생성"
+      description: "텍스트를 벡터로 변환"
+      priority: "필수"
+      status: "개발중"
+      technologies:
+        libraries:
+          - name: "sentence-transformers"
+            version: "2.2.2"
+            purpose: "로컬 임베딩 모델"
+          - name: "OpenAI SDK"
+            version: "1.6.1"
+            purpose: "OpenAI 임베딩 API 클라이언트"
+        apis:
+          - name: "OpenAI Embeddings API"
+          - name: "Cohere Embed API"
 
-**[NOTE] 송수신 메일 조회 시 주의사항:**
-- **델타 쿼리 별도 관리**: 
-  - 송신 메일과 수신 메일의 델타 링크는 별도로 관리해야 함
-  - 각각 다른 폴더(sentItems vs inbox)에 대한 델타 쿼리이므로 동일한 델타 링크 사용 불가
-  - `config.py`에서 각각의 델타 링크를 별도 키로 저장 필요
+    # Graph API 관련 예시 (Delegated Permissions, Auth Code Flow)
+    - id: "F004"
+      name: "Microsoft Graph API를 통한 이메일 수집"
+      description: "웹 브라우저 기반의 OAuth 2.0 Authorization Code Flow로 사용자에게 권한 위임을 받아, Microsoft 365 메일 데이터를 수집/동기화"
+      priority: "중요"
+      status: "미구현"
+      
+      input:
+        - type: "Browser-based OAuth"
+          fields:
+            - name: "client_id"
+              type: "string"
+            - name: "client_secret"
+              type: "string"
+            - name: "redirect_uri"
+              type: "string"
+            - name: "scope"
+              type: "string"
+              default: "Mail.ReadWrite"
+      
+      output:
+        - type: "JSON"
+          schema:
+            emails:
+              - message_id: "string"
+                subject: "string"
+                from: "string"
+                received_date: "string"
+            delta_link: "string"
+            sync_status: "string"
+      
+      processing_steps:
+        - "사용자가 웹 브라우저로 로그인 (Authorization Code Flow)"
+        - "Authorization Code를 서버가 받아서 Token 교환 (msal 라이브러리 활용)"
+        - "Graph API(/me/messages, /me/mailFolders/delta 등) 호출"
+        - "증분 동기화(Delta Query) 사용"
+        - "수집된 이메일 DB 저장"
+      
+      technologies:
+        libraries:
+          - name: "msal"
+            version: "1.x"
+            purpose: "OAuth 2.0 Authorization Code Flow 토큰 관리"
+          - name: "requests"
+            version: "2.x"
+            purpose: "HTTP 호출"
+        apis:
+          - name: "Microsoft Graph API"
+            endpoints:
+              - "/me/messages"
+              - "/me/mailFolders/delta"
+            notes: "Delegated Permission (Mail.ReadWrite), Auth Code Flow"
+      
+      performance:
+        response_time: "< 5초 (1회성 토큰 요청 + 메일 데이터 조회)"
+        throughput: "동시 20건/분"
+        concurrent_users: 50
+      
+      notifications:
+        method: "Webhook or SSE(Server-Sent Events)"
+        content: "새 메일 도착 시 간략 정보(보낸 사람, 제목, 링크)"
+        fallback: "Slack 메시지 or 이메일 알림"
 
-- **API 응답 필드 차이**:
-  - 송신 메일에는 `sentDateTime` 필드가 있으나 수신 메일에는 `receivedDateTime` 필드 사용
-  - 발신자/수신자 정보 구조가 다름 (from vs toRecipients)
-  - 필드 접근 시 항상 키 존재 여부 검증 필요
+  additional_features:
+    - name: "검색 결과 하이라이팅"
+      priority: "선택"
+      related_to: ["F004"]
+    - name: "문서 버전 관리"
+      priority: "중요"
+      related_to: ["F001"]
 
-### 5.3 CLI 모듈
+# 6. 비기능 요구사항
+non_functional_requirements:
+  performance:
+    response_time:
+      api_endpoints:
+        - endpoint: "/upload"
+          method: "POST"
+          target: "< 5초"
+          conditions: "10MB 파일 기준"
+        - endpoint: "/search"
+          method: "GET"
+          target: "< 2초"
+          conditions: "상위 10개 결과"
+    throughput:
+      sustained: "1000 requests/minute"
+      peak: "2000 requests/minute"
+      conditions: "4 vCPU, 16GB RAM 서버"
+    resource_usage:
+      cpu: "< 80% average"
+      memory: "< 4GB per instance"
+      storage_growth: "~100GB/month"
+  
+  security:
+    authentication:
+      methods:
+        - type: "API Key"
+          for: ["API access"]
+        - type: "OAuth 2.0"
+          for: ["Web UI", "Microsoft Graph Delegated Permissions"]
+          providers: ["Google", "GitHub", "Azure AD"]  # Azure AD 추가
+    authorization:
+      model: "RBAC"
+      roles:
+        - name: "admin"
+          permissions: ["all"]
+        - name: "user"
+          permissions: ["read", "write:own"]
+        - name: "viewer"
+          permissions: ["read"]
+    
+    encryption:
+      in_transit: "TLS 1.3"
+      at_rest: "AES-256"
+      key_management: "AWS KMS"
+    
+    compliance:
+      - "GDPR"
+      - "SOC 2 Type II"
+      - "ISO 27001"
+  
+  availability:
+    uptime_target: "99.9%"
+    backup:
+      frequency: "daily"
+      retention: "30 days"
+      type: "incremental"
+      location: "cross-region"
+    disaster_recovery:
+      rto: "4 hours"
+      rpo: "1 hour"
+      strategy: "active-passive"
+  
+  scalability:
+    horizontal:
+      auto_scaling:
+        enabled: true
+        min_instances: 2
+        max_instances: 10
+        metrics:
+          - type: "CPU"
+            target: 70
+          - type: "Request Rate"
+            target: 1000
+    vertical:
+      max_instance_size: "16 vCPU, 64GB RAM"
+    data_partitioning:
+      strategy: "by_tenant"
+      sharding_key: "organization_id"
 
-#### email_cli.py
-- 이메일 관련 명령어 처리
-  - 기간별 수신 메일 데이터 갖어오기
-  - 기간별 송신 메일 데이터 갖어오기
-  - 기간별 송수신 메일 모두 갖어오기
-  - 최근 데이터 갖어온 이후 데이터 갖어오기
+# 7. 제약사항
+constraints:
+  technical:
+    - type: "언어 버전"
+      constraint: "Python 3.12+"
+      reason: "최신 async 기능 필요"
+    - type: "브라우저 지원"
+      constraint: "Chrome 90+, Firefox 88+, Safari 14+"
+      reason: "WebAssembly 지원 필요"
+  
+  business:
+    budget:
+      development: "$100,000"
+      annual_operation: "$20,000"
+      contingency: "10%"
+    timeline:
+      start_date: "2024-01-01"
+      mvp_date: "2024-03-01"
+      phase1_date: "2024-06-01"
+      final_date: "2024-12-01"
+    regulations:
+      - name: "개인정보보호법"
+        requirements: ["개인정보 암호화", "접근 로그"]
+      - name: "전자문서법"
+        requirements: ["문서 무결성 보장", "타임스탬프"]
+  
+  operational:
+    team_size: 5
+    skill_requirements:
+      - "Python 개발 3년 이상"
+      - "클라우드 인프라 경험"
+      - "OAuth2.0/Azure AD 경험"  # 추가
+    maintenance_window: "매주 일요일 02:00-06:00 KST"
 
-#### graphapi_cli.py
-- Graph API 관련 명령어 처리
-  - 인증
-  - 토큰 관리
-  - API 직접 호출
+# 8. 테스트 요구사항
+testing_requirements:
+  unit_testing:
+    coverage_target: 80
+    frameworks:
+      - "pytest"
+      - "pytest-asyncio"
+      - "pytest-mock"
+  
+  integration_testing:
+    scope:
+      - "API endpoints"
+      - "Database operations"
+      - "External service calls"
+      - "OAuth 2.0 Authorization Code Flow"  # 추가
+    tools:
+      - "Postman/Newman"
+      - "Docker Compose"
+  
+  performance_testing:
+    tools:
+      - name: "Locust"
+        for: "Load testing"
+      - name: "K6"
+        for: "Stress testing"
+    scenarios:
+      - name: "Normal Load"
+        users: 100
+        duration: "30 minutes"
+        success_criteria:
+          response_time_p95: "< 3s"
+          error_rate: "< 1%"
+      - name: "Peak Load"
+        users: 500
+        duration: "10 minutes"
+        success_criteria:
+          response_time_p95: "< 5s"
+          error_rate: "< 5%"
+  
+  security_testing:
+    - type: "SAST"
+      tools: ["Bandit", "Safety"]
+    - type: "DAST"
+      tools: ["OWASP ZAP"]
+    - type: "Dependency Scan"
+      tools: ["Snyk", "Dependabot"]
 
-#### db_cli.py
-- 향후 구현
+# 9. 배포 및 운영
+deployment_operations:
+  deployment:
+    strategy: "Blue-Green"
+    environments:
+      - name: "development"
+        url: "https://dev.example.com"
+        auto_deploy: true
+        branch: "develop"
+      - name: "staging"
+        url: "https://staging.example.com"
+        auto_deploy: true
+        branch: "main"
+        approval_required: false
+      - name: "production"
+        url: "https://api.example.com"
+        auto_deploy: false
+        branch: "main"
+        approval_required: true
+        approvers: ["tech-lead", "pm"]
+    rollback:
+      strategy: "automatic"
+      conditions:
+        - "Error rate > 10%"
+        - "Response time > 10s"
+        - "Health check failures"
+  
+  monitoring:
+    infrastructure:
+      tools:
+        - name: "Prometheus"
+          for: "Metrics collection"
+        - name: "Grafana"
+          for: "Visualization"
+      metrics:
+        - "CPU usage"
+        - "Memory usage"
+        - "Disk I/O"
+        - "Network traffic"
+    
+    application:
+      tools:
+        - name: "Sentry"
+          for: "Error tracking"
+        - name: "New Relic"
+          for: "APM"
+      custom_metrics:
+        - name: "documents_processed"
+          type: "counter"
+          labels: ["document_type", "status"]
+        - name: "search_latency"
+          type: "histogram"
+          buckets: [0.1, 0.5, 1.0, 2.0, 5.0]
+    
+    logging:
+      format: "JSON"
+      levels:
+        production: "INFO"
+        staging: "DEBUG"
+      retention:
+        hot: "7 days"
+        warm: "30 days"
+        cold: "1 year"
+      tools:
+        - name: "ELK Stack"
+          components:
+            - "Elasticsearch"
+            - "Logstash"
+            - "Kibana"
+    
+    alerting:
+      channels:
+        - type: "email"
+          for: ["critical", "warning"]
+        - type: "Slack"
+          for: ["all"]
+        - type: "PagerDuty"
+          for: ["critical"]
+      rules:
+        - name: "High Error Rate"
+          condition: "error_rate > 5%"
+          duration: "5 minutes"
+          severity: "critical"
+        - name: "API Latency"
+          condition: "p95_latency > 5s"
+          duration: "10 minutes"
+          severity: "warning"
 
-### 5.4 유틸리티 모듈
+# 10. 위험 관리
+risk_management:
+  technical_risks:
+    - id: "R001"
+      description: "OpenAI API 의존성"
+      probability: "medium"
+      impact: "high"
+      mitigation:
+        - "로컬 임베딩 모델 백업 준비"
+        - "여러 임베딩 서비스 provider 지원"
+      owner: "tech-lead"
+    - id: "R002"
+      description: "대용량 파일 처리 성능"
+      probability: "high"
+      impact: "medium"
+      mitigation:
+        - "스트리밍 처리 구현"
+        - "백그라운드 작업 큐 도입"
+      owner: "backend-team"
+  
+  business_risks:
+    - id: "R003"
+      description: "예산 초과"
+      probability: "medium"
+      impact: "high"
+      mitigation:
+        - "주간 비용 모니터링"
+        - "자동 비용 알림 설정"
+      owner: "project-manager"
 
-#### logging_config.py
-- 로깅 설정 및 관리
+# 11. 승인 및 변경 관리
+governance:
+  approvals:
+    - role: "Product Owner"
+      name: "홍길동"
+      date: "2024-01-01"
+      status: "approved"
+    - role: "Technical Lead"
+      name: "김철수"
+      date: "2024-01-02"
+      status: "approved"
+  
+  change_management:
+    process:
+      - step: "Change Request"
+        responsible: "Anyone"
+        template: "change_request_form.yaml"
+      - step: "Impact Analysis"
+        responsible: "Tech Lead"
+        sla: "2 business days"
+      - step: "Approval"
+        responsible: "Change Advisory Board"
+        sla: "5 business days"
+      - step: "Implementation"
+        responsible: "Development Team"
+    change_log:
+      - id: "CHG001"
+        date: "2024-01-15"
+        type: "feature"
+        description: "검색 API 응답 형식 변경"
+        requestor: "frontend-team"
+        status: "approved"
+        impact: "medium"
 
-#### exceptions.py
-- 예외 처리 및 에러 관리
+# 12. 용어집
+glossary:
+  - term: "Embedding"
+    definition: "텍스트를 고차원 벡터로 변환한 표현"
+    context: "머신러닝"
+  - term: "Chunking"
+    definition: "긴 텍스트를 의미 있는 작은 단위로 분할하는 과정"
+    context: "텍스트 처리"
+  - term: "Vector Store"
+    definition: "벡터 데이터를 효율적으로 저장하고 검색하는 데이터베이스"
+    context: "데이터베이스"
+  - term: "Authorization Code Flow"
+    definition: "웹 브라우저 리다이렉트 기반 OAuth 2.0 인증 방식"
+    context: "마이크로소프트 Graph API, 구글, 깃허브 등"
 
+# 13. 참조 문서
+references:
+  internal_docs:
+    - title: "시스템 아키텍처 설계서"
+      version: "2.0"
+      location: "docs/architecture.md"
+      last_updated: "2024-01-01"
+    - title: "API 설계 가이드"
+      version: "1.5"
+      location: "docs/api-guide.md"
+      last_updated: "2023-12-15"
+  external_docs:
+    - title: "FastAPI Documentation"
+      url: "https://fastapi.tiangolo.com/"
+      relevant_sections:
+        - "Async Support"
+        - "Dependency Injection"
+    - title: "OpenAI API Reference"
+      url: "https://platform.openai.com/docs/api-reference"
+      relevant_sections:
+        - "Embeddings"
+        - "Rate Limits"
+    - title: "Microsoft Graph Authentication"
+      url: "https://learn.microsoft.com/en-us/graph/auth-v2-user"
+      relevant_sections:
+        - "Authorization Code Flow"
+        - "Delegated Permissions"
 
-## 7. 종합 요약
-
-이 프로젝트는 Microsoft Graph API를 활용한 이메일 관리 도구로, 이메일 조회, 검색, 발송 기능을 제공합니다. 모듈화된 구조와 명확한 인터페이스를 통해 확장성과 유지보수성을 확보합니다. CLI를 통해 사용자 친화적인 인터페이스를 제공하며, 로컬 데이터베이스를 활용하여 이메일 데이터를 효율적으로 관리합니다.
+# 14. 부록
+appendix:
+  diagrams:
+    - name: "System Architecture"
+      type: "mermaid"
+      location: "diagrams/system-architecture.mmd"
+    - name: "Data Flow"
+      type: "plantuml"
+      location: "diagrams/data-flow.puml"
+  mockups:
+    - name: "Upload Page"
+      type: "figma"
+      url: "https://figma.com/file/..."
+    - name: "Search Interface"
+      type: "image"
+      location: "mockups/search-ui.png"
+  sample_data:
+    - name: "API Request Examples"
+      location: "examples/api-requests.json"
+    - name: "Test Documents"
+      location: "test-data/documents/"
