@@ -52,33 +52,29 @@ project/
 ### 5.1 Atomic 유스케이스
 1. **문서 로더(Loader) 모듈**
    - 사용 : PyPDF, PyMuPDF, JSONLoader
-   - 추가 고려 : UnstructuredPDFLoader, TextLoader, WebBaseLoader
+   - 어답터 구현 : UnstructuredPDFLoader, TextLoader, WebBaseLoader
    - 요구사항 : 문서 로더를 어러 개 사용할 예정이기에 필요시 인터페이스, DI, 어댑터 적용
 
 2. **텍스트 청킹 전략**
    - 사용: SemanticChunker
-   - 추가 고려: RecursiveCharacterTextSplitter(일반 텍스트), MarkdownTextSplitter(특정 형식의 Markdown 문서 존재 시)
-   - 요구사항 : 문서 ID, 메타데이터
+   - 어답터 구현: RecursiveCharacterTextSplitter(일반 텍스트), MarkdownTextSplitter(특정 형식의 Markdown 문서 존재 시)
+
 
 3. **임베딩 모델**
    - 사용 : OpenAIEmbeddings (text-embedding-3-small)
-   - 추가 고려: HuggingFaceBgeEmbeddings (BAAI/bge-small-en-v1.5)
-   - 요구사항 : 문서 ID, 메타데이터
+   - 어답터 구현: HuggingFaceBgeEmbeddings (BAAI/bge-small-en-v1.5)
 
-5. **벡터 저장 및 인덱스**
+4. **벡터 저장 및 인덱스**
    - 사용 : Qdrant
-   - 추가 고려: Pinecone(설치안함), FAISS, ChromaDB(설치안함)
-   - 요구사항 : 문서 ID, 메타데이터
+   - 어답터 구현: Pinecone(설치안함), FAISS, ChromaDB(설치안함)
 
-6. **리트리버**
+5. **리트리버**
    - 사용 : MultiVectorRetriever
-   - 추가 고려: MultiQueryRetriever, ParentDocumentRetriever, vectorstore.as_retriever(search_type="mmr"), MultiQueryRetriever,ContextualCompressionRetriever, SelfQueryRetriever
-   - 요구사항 : 문서 ID, 메타데이터
+   - 어답터 구현: MultiQueryRetriever, ParentDocumentRetriever, vectorstore.as_retriever(search_type="mmr"), MultiQueryRetriever,ContextualCompressionRetriever, SelfQueryRetriever
 
-2. **API 데이터 업로드 & 처리**
+6. **API 데이터 업로드 & 처리**
    - 사용 : OpenAIEmbeddings (text-embedding-3-small)
-   - 추가 고려: HuggingFaceBgeEmbeddings (BAAI/bge-small-en-v1.5)
-   - 요구사항 : 문서 ID, 메타데이터
+   - 어답터 구현: HuggingFaceBgeEmbeddings (BAAI/bge-small-en-v1.5)
 
 ### 5.2 Composit 유스케이스/서비스
 1. **벡터 DB 저장**
