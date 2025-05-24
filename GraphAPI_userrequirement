@@ -4,8 +4,8 @@
 project:
   name: "Microsoft 365 메일 수집 시스템"
   version: "1.0.0"
-  created_date: "2024-01-01"
-  last_modified: "2024-01-01"
+  created_date: "2025-01-01"
+  last_modified: "2025-01-01"
   authors:
     - name: "작성자명"
       role: "역할"
@@ -14,12 +14,12 @@ project:
 # 1. 프로젝트 개요
 overview:
   background: |
-    Microsoft 365 사용자의 이메일 데이터를 안전하게 수집하고 동기화하는 시스템 필요
-    OAuth 2.0 Authorization Code Flow를 통한 사용자 권한 위임 방식 적용
+    - Microsoft 365 사용자의 이메일 데이터를 안전하게 수집하고 동기화하는 시스템 필요
+    - OAuth 2.0 Authorization Code Flow를 통한 사용자 권한 위임 방식 적용
   
   objectives:
     - "Microsoft Graph API를 통한 안전한 메일 데이터 수집"
-    - "사용자별 권한 위임 기반 인증 구현"
+    - "사용자별 권한 위임 기반, 인증 코드 플로우 구현"
     - "증분 동기화를 통한 효율적인 데이터 관리"
   
   core_values:
@@ -65,20 +65,20 @@ technology_stack:
     
   databases:
     primary:
-      type: "PostgreSQL"
-      version: "15.0"
-      purpose: "메일 메타데이터 및 토큰 저장"
+      type: "sqlite"
+      version: "Not Decided"
+      purpose: "메일 조회 히스트로 저장(메타정보 저장)"
     cache:
-      type: "Redis"
-      version: "7.0"
-      purpose: "토큰 캐싱 및 세션 관리"
+      type: "Not Decided"
+      version: "Not Decided"
+      purpose: "Not Decided"
   
   authentication_libraries:
     - name: "MSAL (Microsoft Authentication Library)"
-      version: "1.24+"
+      version: "latest"
       purpose: "Microsoft 인증 처리"
     - name: "Authlib"
-      version: "1.2+"
+      version: "latest"
       purpose: "OAuth 2.0 플로우 구현"
 
 # 4. 기능 요구사항
@@ -92,21 +92,26 @@ functional_requirements:
       processing_steps:
         - "인증 URL 생성 (state, PKCE 포함)"
         - "사용자를 Microsoft 로그인 페이지로 리다이렉트"
-        - "Authorization Code 수신"
+        - "Authorization Code 수신 후 코드 자동 처리"
         - "Code를 Access Token으로 교환"
         - "Refresh Token 안전하게 저장"
       input:
         - type: "OAuth Parameters"
           fields:
-            - name: "client_id"
+            - name: "CLIENT_ID"
               type: "string"
-            - name: "client_secret"
+            - name: "TENANT_ID"
               type: "string"
             - name: "redirect_uri"
               type: "string"
-            - name: "scope"
+            - name: "CLIENT_SECRET"
+              type: "string"
+            - name: "SCOPES"
               type: "string"
               default: "User.Read Mail.Read Mail.ReadWrite offline_access"
+            - name: "USER_ID"
+              type: "string"
+
       output:
         - type: "JSON"
           schema:
@@ -126,19 +131,9 @@ functional_requirements:
         - "토큰 만료 시간 확인"
         - "Refresh Token으로 새 Access Token 요청"
         - "새 토큰 저장 및 캐시 업데이트"
-      
-    - id: "AUTH003"
-      name: "로그아웃"
-      description: "사용자 세션 종료 및 토큰 폐기"
-      priority: "필수"
-      status: "미구현"
-      processing_steps:
-        - "로컬 토큰 삭제"
-        - "Redis 세션 정리"
-        - "Microsoft 로그아웃 엔드포인트 호출 (선택)"
-    
+          
     - id: "AUTH004"
-      name: "토큰 상태 확인"
+      name: "토큰 상태 확인 및 갱신"
       description: "현재 토큰 유효성 및 권한 확인"
       priority: "중요"
       status: "미구현"
@@ -183,7 +178,16 @@ functional_requirements:
         - "deltaLink 저장"
         - "다음 동기화 시 deltaLink 사용하여 변경사항만 수집"
         - "새 deltaLink로 업데이트"
+    - id: "MAIL004"
+      name: "기간 메일 수집"
+      description: "특정 기간동안 송수신한 메일 확인"
+      priority: "필수"
+      status: "개발중"
+      dependencies: ["AUTH004"]
+      api_endpoint: "GET /me/messages"
+      parameters:
 
+      
 # 5. 비기능 요구사항
 non_functional_requirements:
   security:
