@@ -1,334 +1,232 @@
-# 사용자 요구사항 문서 (YAML)
-# Microsoft Graph API 메일 수집 시스템
+# Microsoft 365 메일 수집 시스템 v1.0.0
 
-project:
-  name: "Microsoft 365 메일 수집 시스템"
-  version: "1.0.0"
-  created_date: "2025-01-01"
-  last_modified: "2025-01-01"
-  authors:
-    - name: "작성자명"
-      role: "역할"
-      email: "email@example.com"
+*(created 2025-01-01, last modified 2025-01-01)*
 
-# 1. 프로젝트 개요
-overview:
-  background: |
-    - Microsoft 365 사용자의 이메일 데이터를 안전하게 수집하고 동기화하는 시스템 필요
-    - OAuth 2.0 Authorization Code Flow를 통한 사용자 권한 위임 방식 적용
-  
-  objectives:
-    - "Microsoft Graph API를 통한 안전한 메일 데이터 수집"
-    - "사용자별 권한 위임 기반, 인증 코드 플로우 구현"
-    - "증분 동기화를 통한 효율적인 데이터 관리"
-  
-  core_values:
-    - value: "보안성"
-      description: "OAuth 2.0 기반 안전한 인증 및 권한 관리"
-    - value: "효율성"
-      description: "Delta Query를 활용한 증분 동기화", "메일 수신 시 알림'
-    - value: "사용자 친화성"
-      description: "간편한 웹 기반 인증 프로세스"
-  
-  target_users:
-    - type: "기업 사용자"
-      needs: ["Microsoft 365 계정", "웹 브라우저"]
-    - type: "시스템 관리자"
-      needs: ["사용자 권한 관리", "동기화 상태 모니터링"]
+| 작성자  | 역할 | 이메일                                           |
+| :--- | :- | :-------------------------------------------- |
+| 작성자명 | 역할 | [email@example.com](mailto:email@example.com) |
 
-# 2. 프로젝트 범위
-scope:
-  included:
-    - "OAuth 2.0 Authorization Code Flow 인증 시스템"
-    - "권한위임 방식"
-    - "Microsoft Graph API를 통한 메일 수집"
-    - "토큰 관리 및 자동 갱신"
-    - "증분 동기화 (Delta Query)"
-    - "수집된 메일 데이터 저장 및 관리"
-    - "특정 기간 동안 송수신 메일 수집 및 관리"
-    - "메일 작성 및 발송 기능"
-    - "첨부파일 분석"
-    - "메일 내용 검색 엔진"
+---
 
-# 3. 기술 스택
-technology_stack:
-  languages:
-    - name: "Python"
-      version: "3.10+"
-      reason: "MSAL 라이브러리 지원, 비동기 처리"
-  
-  frameworks:
-    backend:
-      - name: "FastAPI"
-        version: "0.104.1"
-        purpose: "REST API 서버 및 OAuth 콜백 처리"
-    
-  databases:
-    primary:
-      type: "sqlite"
-      version: "Not Decided"
-      purpose: "메일 조회 히스트로 저장(메타정보 저장)"
-    cache:
-      type: "Not Decided"
-      version: "Not Decided"
-      purpose: "Not Decided"
-  
-  authentication_libraries:
-    - name: "MSAL (Microsoft Authentication Library)"
-      version: "latest"
-      purpose: "Microsoft 인증 처리"
-    - name: "Authlib"
-      version: "latest"
-      purpose: "OAuth 2.0 플로우 구현"
+## 1. 프로젝트 개요
 
-# 4. 기능 요구사항
-functional_requirements:
-  authentication_features:
-    - id: "AUTH001"
-      name: "OAuth 2.0 사용자 인증"
-      description: "Authorization Code Flow를 통한 Microsoft 365 사용자 인증, 권한위임 방식"
-      priority: "필수"
-      status: "개발중"
-      processing_steps:
-        - "인증 URL 생성 (state, PKCE 포함)"
-        - "사용자를 Microsoft 로그인 페이지로 리다이렉트"
-        - "Authorization Code 수신 후 코드 자동 처리"
-        - "Code를 Access Token으로 교환"
-        - "Refresh Token 안전하게 저장"
-      input:
-        - type: "OAuth Parameters"
-          fields:
-            - name: "CLIENT_ID"
-              type: "string"
-            - name: "TENANT_ID"
-              type: "string"
-            - name: "redirect_uri"
-              type: "string"
-            - name: "CLIENT_SECRET"
-              type: "string"
-            - name: "SCOPES"
-              type: "string"
-              default: "User.Read Mail.Read Mail.ReadWrite offline_access"
-            - name: "USER_ID"
-              type: "string"
+### 🔍 배경
 
-      output:
-        - type: "JSON"
-          schema:
-            access_token: "string"
-            refresh_token: "string"
-            expires_in: "integer"
-            user_info:
-              email: "string"
-              display_name: "string"
-    
-    - id: "AUTH002"
-      name: "토큰 갱신"
-      description: "만료된 Access Token을 Refresh Token으로 자동 갱신"
-      priority: "필수"
-      status: "개발중"
-      processing_steps:
-        - "토큰 만료 시간 확인"
-        - "Refresh Token으로 새 Access Token 요청"
-        - "새 토큰 저장 및 캐시 업데이트"
-          
-    - id: "AUTH004"
-      name: "토큰 상태 확인 및 갱신"
-      description: "현재 토큰 유효성 및 권한 확인"
-      priority: "중요"
-      status: "미구현"
-      output:
-        - type: "JSON"
-          schema:
-            is_valid: "boolean"
-            expires_at: "datetime"
-            scopes: ["string"]
-            user_email: "string"
+* Microsoft 365 사용자의 이메일 데이터를 **안전하게 수집·동기화**할 시스템이 필요
+* OAuth 2.0 **Authorization Code Flow**로 사용자 권한을 위임하여 인증 처리
 
+### 🎯 목표
 
-  mail_collection_features:
-    - id: "MAIL001"
-      name: "메일 목록 수집"
-      description: "인증된 사용자의 메일 목록 가져오기"
-      priority: "필수"
-      status: "개발중"
-      dependencies: ["AUTH001"]
-      api_endpoint: "GET /me/messages"
-      parameters:
-        - "$top": "페이지당 메일 수"
-        - "$select": "필요한 필드만 선택"
-        - "$orderby": "정렬 기준"
-      
-    - id: "MAIL002"
-      name: "메일 폴더별 수집"
-      description: "특정 메일 폴더의 메일 수집"
-      priority: "중요"
-      status: "미구현"
-      dependencies: ["AUTH001", "MAIL001"]
-      api_endpoint: "GET /me/mailFolders/{folder-id}/messages"
-      
-    - id: "MAIL003"
-      name: "증분 동기화"
-      description: "Delta Query를 사용한 변경사항만 동기화"
-      priority: "필수"
-      status: "미구현"
-      dependencies: ["AUTH001"]
-      api_endpoint: "GET /me/messages/delta"
-      processing_steps:
-        - "초기 동기화 시 전체 메일 수집"
-        - "deltaLink 저장"
-        - "다음 동기화 시 deltaLink 사용하여 변경사항만 수집"
-        - "새 deltaLink로 업데이트"
-    - id: "MAIL004"
-      name: "기간 메일 수집"
-      description: "특정 기간동안 송수신한 메일 확인"
-      priority: "필수"
-      status: "개발중"
-      dependencies: ["AUTH004"]
-      api_endpoint: "GET /me/messages"
-      parameters:
+* **Microsoft Graph API**를 이용한 안전한 메일 데이터 수집
+* 사용자별 권한 위임(Authorization Code Flow) 구현
+* **Delta Query** 기반 증분 동기화로 효율적인 데이터 관리
 
-    - id: "MAIL005"
-      name: "새로운 메일 알림"
-      description: "새로운 메일 도착 시 알림(알림 받으면 처리)"
-      priority: "필수"
-      status: "미구현"
-      dependencies: ["AUTH004"]
-      api_endpoint: "GET /me/messages"
-      parameters:
-      
-# 5. 비기능 요구사항
-non_functional_requirements:
-  security:
-    authentication:
-      - "PKCE (Proof Key for Code Exchange) 적용"
-      - "State 파라미터로 CSRF 방지"
-      - "토큰 암호화 저장"
-      - "HTTPS 전용 통신"
-    
-    token_management:
-      - "Access Token 만료 시간: 1시간"
-      - "Refresh Token 만료 시간: 90일"
-      - "토큰 자동 갱신: 만료 5분 전"
-    
-    permissions:
-      - "최소 권한 원칙 적용"
-      - "필요한 Graph API 권한만 요청"
-      - "사용자별 권한 격리"
-  
-  performance:
-    - "동시 인증 처리: 100 사용자/분"
-    - "메일 수집 속도: 1000 메일/분"
-    - "토큰 갱신 시간: < 1초"
-  
-  availability:
-    - "토큰 갱신 실패 시 재시도 로직"
-    - "Graph API 장애 시 백오프 전략"
-    - "로컬 캐싱으로 일시적 오프라인 지원"
+### 💎 핵심 가치
 
-# 6. API 엔드포인트
-api_endpoints:
-  authentication:
-    - path: "/auth/login"
-      method: "GET"
-      description: "Microsoft 로그인 페이지로 리다이렉트"
-      
-    - path: "/auth/callback"
-      method: "GET"
-      description: "OAuth 콜백 처리 및 토큰 교환"
-      parameters:
-        - name: "code"
-          type: "string"
-          required: true
-        - name: "state"
-          type: "string"
-          required: true
-    
-    - path: "/auth/refresh"
-      method: "POST"
-      description: "토큰 갱신"
-      
-    - path: "/auth/logout"
-      method: "POST"
-      description: "로그아웃 처리"
-    
-    - path: "/auth/status"
-      method: "GET"
-      description: "현재 인증 상태 확인"
-  
-  mail_operations:
-    - path: "/mail/sync"
-      method: "POST"
-      description: "메일 동기화 시작"
-      
-    - path: "/mail/folders"
-      method: "GET"
-      description: "메일 폴더 목록 조회"
-      
-    - path: "/mail/messages"
-      method: "GET"
-      description: "수집된 메일 목록 조회"
+| 가치          | 설명                              |
+| :---------- | :------------------------------ |
+| **보안성**     | OAuth 2.0 기반 안전한 인증·권한 관리       |
+| **효율성**     | Delta Query 활용 증분 동기화, 메일 수신 알림 |
+| **사용자 친화성** | 간편한 웹 기반 인증 프로세스                |
 
-# 7. 데이터 모델
-data_models:
-  user_session:
-    fields:
-      - user_id: "string (primary key)"
-      - email: "string"
-      - display_name: "string"
-      - access_token: "encrypted string"
-      - refresh_token: "encrypted string"
-      - token_expires_at: "datetime"
-      - delta_link: "string"
-      - last_sync: "datetime"
-  
-  mail_message:
-    fields:
-      - message_id: "string (primary key)"
-      - user_id: "string (foreign key)"
-      - subject: "string"
-      - from_address: "string"
-      - to_addresses: "array"
-      - received_datetime: "datetime"
-      - folder_id: "string"
-      - is_read: "boolean"
-      - has_attachments: "boolean"
+### 👥 대상 사용자
 
-# 8. 에러 처리
-error_handling:
-  authentication_errors:
-    - code: "AUTH_FAILED"
-      description: "인증 실패"
-      action: "로그인 페이지로 리다이렉트"
-    
-    - code: "TOKEN_EXPIRED"
-      description: "토큰 만료"
-      action: "자동 갱신 시도"
-    
-    - code: "INVALID_SCOPE"
-      description: "권한 부족"
-      action: "필요 권한 재요청"
-  
-  api_errors:
-    - code: "RATE_LIMIT"
-      description: "API 호출 한도 초과"
-      action: "지수 백오프로 재시도"
-    
-    - code: "GRAPH_API_ERROR"
-      description: "Graph API 오류"
-      action: "에러 로깅 및 사용자 알림"
+| 유형      | 필요 사항                    |
+| :------ | :----------------------- |
+| 기업 사용자  | Microsoft 365 계정, 웹 브라우저 |
+| 시스템 관리자 | 사용자 권한 관리, 동기화 상태 모니터링   |
 
-# 9. 모니터링
-monitoring:
-  metrics:
-    - "인증 성공/실패율"
-    - "토큰 갱신 빈도"
-    - "API 호출 수/분"
-    - "동기화된 메일 수"
-    - "평균 응답 시간"
-  
-  alerts:
-    - "인증 실패율 > 10%"
-    - "토큰 갱신 실패"
-    - "API 할당량 80% 도달"
-    - "동기화 지연 > 5분"
+---
+
+## 2. 프로젝트 범위
+
+### 포함
+
+* OAuth 2.0 **Authorization Code Flow** 인증·권한 위임
+* Microsoft Graph API를 통한 메일 수집
+* 토큰 관리(자동 갱신 포함)
+* **증분 동기화(Delta Query)**
+* 수집 메일 저장·관리 & 기간별 메일 수집
+* 메일 작성·발송, 첨부파일 분석
+* 메일 내용 검색 엔진
+
+---
+
+## 3. 기술 스택
+
+| 구분        | 항목            | 버전 / 상태 | 비고                          |
+| :-------- | :------------ | :------ | :-------------------------- |
+| 언어        | Python        | 3.10+   | MSAL 지원, 비동기 처리             |
+| 백엔드 프레임워크 | FastAPI       | 0.104.1 | REST API & OAuth 콜백         |
+| DB (메타)   | SQLite        | 추후 결정   | 메일 메타 정보 저장                 |
+| 캐시        | 미정            | —       | —                           |
+| 인증 라이브러리  | MSAL, Authlib | latest  | Microsoft 인증 / OAuth 2.0 구현 |
+
+---
+
+## 4. 기능 요구사항
+
+### 4.1 인증(Authentication)
+
+| ID          | 기능               | 설명                                      | 상태  |
+| :---------- | :--------------- | :-------------------------------------- | :-- |
+| **AUTH001** | OAuth 2.0 사용자 인증 | Authorization Code Flow, PKCE·state 포함  | 개발중 |
+| **AUTH002** | 토큰 갱신            | 만료된 Access Token을 Refresh Token으로 자동 갱신 | 개발중 |
+| **AUTH004** | 토큰 상태 확인         | 유효성·권한·만료 시점 점검                         | 미구현 |
+
+**AUTH001 처리 흐름**
+
+1. 인증 URL 생성(state, PKCE)
+2. 사용자를 Microsoft 로그인 페이지로 리다이렉트
+3. `authorization_code` 수신 → Access Token 교환
+4. Refresh Token 안전 저장
+
+출력(JSON 예시):
+
+```json
+{
+  "access_token": "...",
+  "refresh_token": "...",
+  "expires_in": 3600,
+  "user_info": {
+    "email": "user@example.com",
+    "display_name": "홍길동"
+  }
+}
+```
+
+---
+
+### 4.2 메일 수집(Mail Collection)
+
+| ID          | 기능         | Graph API 엔드포인트                            | 우선순위 | 상태  |
+| :---------- | :--------- | :----------------------------------------- | :--- | :-- |
+| **MAIL001** | 메일 목록 수집   | `GET /me/messages`                         | 필수   | 개발중 |
+| **MAIL002** | 폴더별 메일 수집  | `GET /me/mailFolders/{folder-id}/messages` | 중요   | 미구현 |
+| **MAIL003** | **증분 동기화** | `GET /me/messages/delta`                   | 필수   | 미구현 |
+| **MAIL004** | 기간 메일 수집   | `GET /me/messages` (쿼리)                    | 필수   | 개발중 |
+| **MAIL005** | 새로운 메일 알림  | (Webhooks / Subscriptions)                 | 필수   | 미구현 |
+
+*MAIL003 증분 동기화 단계*
+
+1. 최초 전체 동기화 → `deltaLink` 저장
+2. 이후 동기화 시 `deltaLink` 사용 → 변경분만 수집
+3. 최신 `deltaLink`로 갱신
+
+---
+
+## 5. 비기능 요구사항
+
+### 🔐 보안
+
+* PKCE·state 파라미터, HTTPS 전용
+* Access Token 1 시간·Refresh Token 90 일
+* 만료 5 분 전 자동 갱신
+* 최소 권한 원칙(필요 스코프만 요청)
+
+### 🚀 성능
+
+* 동시 인증 처리 : 100 사용자/분
+* 메일 수집 속도 : 1 000 메일/분
+* 토큰 갱신 < 1 초
+
+### ☑️ 가용성
+
+* 토큰 갱신 실패 시 재시도
+* Graph API 장애 시 지수 백오프
+* 로컬 캐싱으로 일시적 오프라인 지원
+
+---
+
+## 6. API 엔드포인트 설계
+
+### 🔑 Authentication
+
+| Method   | Path                          | 설명                       |
+| :------- | :---------------------------- | :----------------------- |
+| **GET**  | `/auth/login`                 | Microsoft 로그인 페이지로 리다이렉트 |
+| **GET**  | `/auth/callback?code=&state=` | OAuth 콜백, 토큰 교환          |
+| **POST** | `/auth/refresh`               | 토큰 갱신                    |
+| **POST** | `/auth/logout`                | 로그아웃                     |
+| **GET**  | `/auth/status`                | 현재 인증 상태 조회              |
+
+### ✉️ Mail Operations
+
+| Method   | Path             | 설명           |
+| :------- | :--------------- | :----------- |
+| **POST** | `/mail/sync`     | 메일 동기화 시작    |
+| **GET**  | `/mail/folders`  | 메일 폴더 목록 조회  |
+| **GET**  | `/mail/messages` | 수집된 메일 목록 조회 |
+
+---
+
+## 7. 데이터 모델
+
+### 7.1 `user_session`
+
+| 필드                 | 타입 / 제약              |
+| :----------------- | :------------------- |
+| `user_id`          | string PK            |
+| `email`            | string               |
+| `display_name`     | string               |
+| `access_token`     | **encrypted** string |
+| `refresh_token`    | **encrypted** string |
+| `token_expires_at` | datetime             |
+| `delta_link`       | string               |
+| `last_sync`        | datetime             |
+
+### 7.2 `mail_message`
+
+| 필드                  | 타입 / 제약   |
+| :------------------ | :-------- |
+| `message_id`        | string PK |
+| `user_id`           | string FK |
+| `subject`           | string    |
+| `from_address`      | string    |
+| `to_addresses`      | array     |
+| `received_datetime` | datetime  |
+| `folder_id`         | string    |
+| `is_read`           | boolean   |
+| `has_attachments`   | boolean   |
+
+---
+
+## 8. 에러 처리
+
+### Authentication
+
+| 코드              | 설명    | 조치             |
+| :-------------- | :---- | :------------- |
+| `AUTH_FAILED`   | 인증 실패 | 로그인 페이지로 리다이렉트 |
+| `TOKEN_EXPIRED` | 토큰 만료 | 자동 갱신 시도       |
+| `INVALID_SCOPE` | 권한 부족 | 추가 권한 요청       |
+
+### API
+
+| 코드                | 설명           | 조치           |
+| :---------------- | :----------- | :----------- |
+| `RATE_LIMIT`      | 호출 한도 초과     | 지수 백오프로 재시도  |
+| `GRAPH_API_ERROR` | Graph API 오류 | 에러 로깅·사용자 알림 |
+
+---
+
+## 9. 모니터링
+
+### 📊 주요 지표
+
+* 인증 성공/실패율
+* 토큰 갱신 빈도
+* API 호출 수/분
+* 동기화된 메일 수
+* 평균 응답 시간
+
+### 🔔 알림 조건
+
+* 인증 실패율 > 10 %
+* 토큰 갱신 실패 발생
+* API 할당량 80 % 초과
+* 동기화 지연 > 5 분
+
+---
+
+> **이 문서는 YAML 요구사항을 Markdown 형식으로 변환한 버전입니다.** 필요에 따라 섹션을 추가·수정해 사용하세요.
