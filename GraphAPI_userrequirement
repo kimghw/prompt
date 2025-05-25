@@ -55,29 +55,125 @@
 
 ## 3. 기술 스택
 
-| 구분               | 패키지 / 엔진           | 버전      | 용도 · 비고                          |
-| :--------------- | :----------------- | :------ | :------------------------------- |
-| **언어 & 런타임**     | Python             | 3.10 +  | 비동기 지원, MSAL 호환                  |
-| **웹-ASGI**       | FastAPI            | 0.104.1 | REST API 서버, OAuth 콜백            |
-|                  | Uvicorn            | 0.24.0  | ASGI 실행 서버                       |
-| **CLI**          | Typer              | 0.9.0   | 현대적인 CLI 프레임워크                   |
-|                  | Rich               | 13.7.0  | 컬러·테이블·프로그레스바 등 터미널 UI           |
-| **데이터 검증 & 설정**  | Pydantic           | 2.5.0   | 데이터 검증·직렬화                       |
-|                  | Pydantic-Settings  | 2.1.0   | `.env`·환경 변수 관리                  |
-| **HTTP 클라이언트**   | HTTPX              | 0.25.2  | 비동기 HTTP 호출                      |
-|                  | aiohttp            | latest  | OAuth 콜백 서버 등 보조 용도              |
-| **ORM & 데이터베이스** | SQLAlchemy         | 2.0.23  | 비동기 ORM                          |
-|                  | SQLite             | —       | 개발·테스트용 경량 DB                    |
-| **캐시**           | (미정)               | —       | 추후 선정                            |
-| **인증·보안**        | MSAL               | 1.25.0  | Microsoft Authentication Library |
-|                  | Authlib            | latest  | OAuth 2.0 구현 보조                  |
-|                  | python-jose        | latest  | JWT 토큰 서명·검증                     |
-|                  | Custom OAuth Impl. | —       | Authorization Code + PKCE 로직     |
+## 3. 기술 스택 ― **전체 통합표**
+
+| 구분                    | 패키지 / 엔진             | 버전                  | 용도 · 비고                          |
+| :--------------------  | :------------------- | :------------------ | :------------------------------- |
+| **언어 & 런타임**        | Python               | **3.11 권장** (3.10+) | 비동기 지원, MSAL 호환                  |
+| **웹 · ASGI**          | FastAPI              | 0.104.1             | REST API 서버, OAuth 콜백            |
+|                        | Uvicorn              | 0.24.0              | ASGI 실행 서버                       |
+| **CLI**                | Typer                | 0.9.0               | 현대적 CLI 프레임워크                    |
+|                       | Rich                 | 13.7.0              | 터미널 UI (컬러, 표, 프로그레스바)           |
+| **데이터 검증 & 설정**    | Pydantic             | 2.5.0               | 데이터 검증·직렬화                       |
+|                       | Pydantic-Settings    | 2.1.0               | 애플리케이션 설정 검증 (.env 포함)           |
+|                       | Python-dotenv        | 1.0.0               | `.env` 파일 로딩                     |
+| **HTTP 클라이언트**      | HTTPX                | 0.25.2              | 비동기 HTTP 호출                      |
+|                       | Requests             | 2.31.0              | 동기 HTTP (호환용)                    |
+|                       | aiohttp              | latest              | OAuth 콜백 서버 등 보조                 |
+| **ORM · DB · 마이그레이션** | SQLAlchemy           | 2.0.23              | 비동기 ORM                          |
+|                       | Alembic              | 1.13.1              | DB 마이그레이션                        |
+|                       | PostgreSQL           | latest              | 프로덕션 메인 DB                       |
+|                       | SQLite               | —                   | 개발·테스트용 경량 DB                    |
+| **캐시 / 브로커**        | Redis                | 5.0.1               | 캐싱·메시지 브로커 *(Celery backend)*    |
+| **비동기 & 백그라운드**   | asyncio              | builtin             | Python 표준 비동기 러너                 |
+|                       | aiofiles             | 23.2.1              | 비동기 파일 I/O                       |
+|                       | Celery               | 5.3.4               | 분산 작업 큐 *(선택)*                   |
+| **재시도 · 복원력**      | tenacity             | 9.1.2               | 재시도·백오프 패턴                       |
+| **인증 · 보안**         | MSAL                 | 1.25.0              | Microsoft Authentication Library |
+|                       | Authlib              | latest              | OAuth 2.0 구현 보조                  |
+|                       | python-jose          | latest              | JWT 서명·검증                        |
+|                       | Custom OAuth Impl.   | —                   | Authorization Code + PKCE 로직     |
+| **로깅 · 모니터링**         | structlog            | 23.2.0              | 구조화된(키-값) 로깅                     |
+|                       | python-json-logger   | 2.0.7               | JSON 포맷터                         |
+|                       | sentry-sdk\[fastapi] | 1.38.0              | 에러·성능 모니터링 *(선택)*                |
+| **코드 품질**             | black                | 23.11.0             | 코드 포매터                           |
+|                       | isort                | 5.12.0              | import 정렬                        |
+| **테스팅**               | pytest               | 7.4.3               | 테스트 프레임워크                        |
+|                       | pytest-asyncio       | 0.21.1              | 비동기 테스트 지원                       |
+|                       | pytest-cov           | 4.1.0               | 커버리지 측정                          |
+| **유틸리티**            | python-dateutil      | 2.8.2               | 고급 날짜·시간 처리                      |
+| **개발 도구**           | VS Code              | —                   | 권장 IDE                           |
+|                       | Git                  | —                   | 버전 관리                            |
+|                       | Docker               | latest              | 컨테이너화 *(선택)*                     |
+| **환경 관리**            | venv / conda         | —                   | 가상환경                             |
+|                       | .env config          | —                   | 환경 변수 관리 (.env)                  |
 
 
 
-## 4. 기능 요구사항
 
+## 4. ATOMIC 유즈 시나리오
+
+### 4.1 다중 계정 및 인증 관리
+
+1. AUTH001 - 계정 등록(기본 : 권한위임)
+- Authorization Code Flow 와 Devide code flow 중 인증방식 선택 후 필수 정보 입력하면 데이터베이스에 저장
+- 두 방식에 공통된 테이블 A 를 두고 각각 B, C 테이블을 구성
+2. AUTH002 - ID 또는 이메일 정보로 조회/변경/삭제
+- ID 또는 이메일 정보로 조회/변경/삭제
+- 모든 사용자 정보 상세 보기
+- 사용자 특정 정보 검색
+- 사용자 또는 모든 사용자 토큰 상태 정보 보기
+3. AUTH003 - 인증하기
+- 사용자정보(이메일/ID)와 인증과정(Authentification flow, device flow)에 따라 인증하기, 인증시 필요한 정보는 데이터베이스에 갖어와서 호출하기
+- 특정 사용자 또는 모든 사용자 인증 하기 
+- 인증 실패 시 에러 코드 데이터베이스에 저장
+- 인증 성공 시 토크 저장(토큰 관련 테이블 생성 후 저장)
+4. AUTH004 - 토큰 갱신
+- 사용자별 토큰 상태 관리
+- 토큰 유효성 검사 및 자동 갱신 설정
+
+### 4.2 메일 송수신 조회
+## 4. MAIL001 - 특정 사용자 또는 모든 사용자 메일 조회
+
+1. 
+
+인 경우 필수 값 입력한 후 계정 생성 후 데이터베이스 저장
+- Devide code flow 인 경우 필수 값 입력한 후 게정 생성 후 데이터베이스 저장
+
+| ID          | 기능             |   주요 처리 단계                                                                         | 입력 DTO                     | 출력 DTO      | 비고                                                       |
+| :---------- | :----------     | :-----------------------------------------------------------------------------------  | :-------------------------- | :----------- | :-------------------------------------------------------------------- |
+| **ACCU001** | 계정(테넌트) 등록   | 1) Email·Tenant ID 중복 확인 → 2) DB 저장 → 3) 감사 로그                                  | `CreateAccountRequest` ,            | `AccountDTO` | • 사용자로 부터 계정정보를 받아 
+| **ACCU002** | 계정 조회/변경/삭제 | 1) ID 존재 확인 → 2) 권한 검사 → 3) 읽기·갱신·Soft-delete → 4) 감사 로그                     | `AccountId` / `QueryParams`   | `AccountDTO` | • Soft-delete (`deleted_at`) <br>• Status 변경 시 토큰 재검증                 |
+
+# 입력
+class CreateAccountRequest(BaseModel):
+    email: EmailStr
+    tenant_id: str
+    auth_type: Literal["delegated"] = "delegated"
+    refresh_token: SecretStr
+
+class UpdateAccountRequest(BaseModel):
+    status: Literal["active", "inactive", "error"] | None = None
+    sync_window_days: int | None = None
+    folder_filters: list[str] | None = None
+
+# 출력
+class TokenMeta(BaseModel):
+    issued_at: datetime
+    expires_at: datetime
+    expires_in: int
+
+class AccountDTO(BaseModel):
+    account_id: UUID
+    email: EmailStr
+    tenant_id: str
+    status: str
+    created_at: datetime
+    last_sync_at: datetime | None
+    token: TokenMeta | None        # 메타만! (raw JWT X)
+
+class DeleteResult(BaseModel):
+    deleted: bool
+    account_id: UUID
+
+class PaginatedAccounts(BaseModel):
+    total: int
+    page: int
+    size: int
+    items: list[AccountDTO]
+
+
+| **ACCU003** | 토큰 상태 확인         | 유효성·권한·만료 시점 점검                         | 미구현 |
 ### 4.1 인증(Authentication)
 
 | ID          | 기능               | 설명                                      | 상태  |
