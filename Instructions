@@ -4,6 +4,38 @@
 ---
 
 
+## 2. 프로젝트 관리(Task 완료 시 작성)
+### 2.1 use_senarios.md 관리
+ - 사용자 요구한 사항을 요약 하고 atomic, composit usecase 기록
+ - 이전 요구사항과 다른 경우 [ ] 를 표시하고 마지막 요구사항만을 반영
+ - 기존 usecase 기반 새로운 가능안 유즈케이스 제안(시스템이 반영하지 않도록 표기)
+- .MemoryBank 에 파일이 없으면 생성하고 초기 projectbrief.md 참조하여 기록
+### 2.2 projectbrief.md 참조
+ - .MemoryBank 에 파일이 없으면 생성
+ - 프로젝트 핵심 요구 사항 및 목표(프로젝트 요구사항)
+### 2.3 systemPatterns.md
+ - .MemoryBank 에 파일이 없으면 생성
+ - 프로젝트 아키텍쳐
+ - 클래스 다이어 그램
+ - 어답터 리스트
+### 2.4 productContext.md
+ - .MemoryBank 에 파일이 없으면 생성
+ - 에러 확인 및 솔루션 기록
+ - 예방조치 방법 작성
+### 2.5 techContext.md
+ - .MemoryBank 에 파일이 없으면 생성
+ - (초기) 프로젝트 진행 시 초기 기술 스택 및 설정 참고 
+  - 변경된 사항 업데이트 기록(변경항목 체크)
+ - .MemoryBank/referenc 에 외부 API, 데이터베이스 사용 지침 관리
+### 2.5 taskContext.md
+ - .MemoryBank 에 파일이 없으면 생성
+ - task 별 진행사항 및 주요 이슈 기록
+ - text 후 에러 내용 및 해결 과정 기록
+### 2.6 progress.md
+ - .MemoryBank 에 파일이 없으면 생성
+ - 프로젝트 진행 사항 및 todolist 관리
+### 2.7 테스트 관리
+
 ## 0. 기본 원칙
 
 - **작업 지시사항 및 작업 순서를 엄격히 준수**  
