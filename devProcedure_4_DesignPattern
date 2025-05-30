@@ -1,0 +1,357 @@
+아래 지침은 프로젝트 전반에 걸쳐 유즈케이스(Use Case) 및 Port/Adapter 패턴을 적용할 때 따라야 할 기준을 정리한 것입니다. 복잡도와 유지보수성을 고려하여 꼭 필요한 경우에만 패턴을 적용하고, 불필요한 추상화를 지양함으로써 코드의 가독성과 확장성을 균형 있게 확보하고자 합니다.
+
+---
+
+## 1. 유즈케이스 패턴 적용 기준
+
+### 1.1 유즈케이스로 구현해야 하는 경우
+
+* **복잡한 비즈니스 로직을 다루는 경우**
+
+  * 여러 단계의 처리 과정이 필요
+  * 복수의 엔티티가 상호작용
+  * 트랜잭션 관리가 필수
+  * 예시: 주문 처리, 결제 승인, 문서 처리 파이프라인 등
+
+* **도메인 규칙(정책, 검증 로직, 상태 전이 등)을 적용해야 하는 경우**
+
+  * 비즈니스 검증 로직이 존재
+  * 특정 이벤트(주문 생성, 결제 완료 등)에 따른 상태 전이 관리
+  * 할인 정책, 승인 워크플로우 등 복잡한 정책 적용
+  * 예시: 할인 정책 적용, 승인 워크플로우
+
+* **외부 시스템 연동 및 조율이 필요한 경우**
+
+  * 여러 외부 API를 호출하여 종합적인 처리를 해야 함
+  * 보상 트랜잭션(트랜잭션 중 일부 실패 시 롤백 시나리오 등)이 필요한 경우
+  * 이벤트 발행이 필요한 경우
+  * 예시: 결제 시스템 연동, 알림 발송
+
+### 1.2 유즈케이스 구현 템플릿
+
+```python
+class CreateOrderUseCase:
+    """복잡한 주문 생성 프로세스"""
+    
+    def __init__(self,
+                 order_repository: OrderRepository,
+                 inventory_service: InventoryService,
+                 payment_service: PaymentService,
+                 event_publisher: EventPublisher):
+        self.order_repository = order_repository
+        self.inventory_service = inventory_service
+        self.payment_service = payment_service
+        self.event_publisher = event_publisher
+    
+    async def execute(self, command: CreateOrderCommand) -> OrderResult:
+        # 1. 비즈니스 규칙 검증
+        self._validate_order_items(command.items)
+        
+        # 2. 재고 확인
+        availability = await self.inventory_service.check_availability(command.items)
+        if not availability.is_available:
+            raise InsufficientInventoryError()
+        
+        # 3. 주문 생성
+        order = Order.create(command.customer_id, command.items)
+        
+        # 4. 결제 처리
+        payment_result = await self.payment_service.process_payment(
+            order.total_amount, command.payment_method
+        )
+        
+        # 5. 주문 저장
+        await self.order_repository.save(order)
+        
+        # 6. 이벤트 발행
+        await self.event_publisher.publish(
+            OrderCreatedEvent(order_id=order.id, customer_id=order.customer_id)
+        )
+        
+        return OrderResult(order_id=order.id, status="CREATED")
+```
+
+* **입력으로 Command 객체 사용**: 필요한 파라미터를 Command로 캡슐화하여 가독성과 유지보수성 향상
+* **트랜잭션 관리**: 데이터베이스 트랜잭션 혹은 Saga/보상 트랜잭션 등의 고려 필요
+* **에러 처리**: 재고 부족, 결제 실패 등 다양한 예외 상황을 명확히 관리
+
+---
+
+## 2. 유즈케이스에 포함되지 않는 기능
+
+### 2.1 단순 CRUD 작업
+
+* 조회, 생성, 수정, 삭제가 단순한 경우(비즈니스 로직이 거의 없음)는 유즈케이스를 별도로 만들지 않고 **라우터(Controller)** 혹은 **Repository**에서 바로 처리
+* 예시:
+
+  ```python
+  # ❌ 불필요한 유즈케이스
+  class GetUserByIdUseCase:
+      def execute(self, user_id: str):
+          return self.repository.find_by_id(user_id)
+
+  # ✅ 라우터에서 직접 처리
+  @router.get("/users/{user_id}")
+  async def get_user(user_id: str, repository: UserRepository = Depends()):
+      user = await repository.find_by_id(user_id)
+      if not user:
+          raise HTTPException(404, "User not found")
+      return user
+  ```
+
+### 2.2 단순 조회 및 필터링
+
+* 복잡한 쿼리는 Repository(또는 전용 Query Service)에 구현
+* 유즈케이스로 감싸지 않고 라우터에서 직접 호출
+* 예시:
+
+  ```python
+  # ✅ 복잡한 쿼리는 Repository에서 처리
+  class ProductRepository:
+      async def find_by_category_with_filters(self,
+                                              category: str,
+                                              min_price: float = None,
+                                              max_price: float = None,
+                                              sort_by: str = "created_at"):
+          query = self.query_builder.build()
+          # 복잡한 쿼리 로직
+          return await self.db.execute(query)
+
+  # 라우터에서 직접 호출
+  @router.get("/products")
+  async def search_products(category: str,
+                            min_price: float = None,
+                            max_price: float = None,
+                            repository: ProductRepository = Depends()):
+      return await repository.find_by_category_with_filters(
+          category, min_price, max_price
+      )
+  ```
+
+---
+
+## 3. Port/Adapter 패턴 적용 가이드
+
+### 3.1 Port 정의가 필요한 경우
+
+* **교체 가능성이 큰 기능**
+
+  * 구현체가 빈번히 변경될 수 있음
+  * Mock 등을 이용해 테스트가 필요한 경우
+  * 예시: 결제 서비스, SMS 발송, 파일 스토리지 연동
+
+* **동시에 다중 구현체를 사용하거나, 런타임에 구현체 선택이 필요한 경우**
+
+  * 예시: 여러 임베딩 모델을 상황에 따라 선택, 여러 클라우드 제공자
+
+* **외부 시스템과 연동 시**
+
+  * 제3자 API, 메시지 큐(Kafka, RabbitMQ 등)
+  * 이벤트 발행 시스템, 외부 결제 시스템 등
+
+### 3.2 Port/Adapter 구현 예시
+
+```python
+# Port 정의
+class PaymentPort(ABC):
+    """결제 처리를 위한 포트 - 여러 결제사 연동 예정"""
+    
+    @abstractmethod
+    async def process_payment(self, amount: Money, method: PaymentMethod) -> PaymentResult:
+        pass
+    
+    @abstractmethod
+    async def refund(self, transaction_id: str, amount: Money) -> RefundResult:
+        pass
+
+# Adapter 구현
+class StripeAdapter(PaymentPort):
+    """Stripe 결제 어댑터"""
+    
+    def __init__(self, api_key: str):
+        self.client = stripe.Client(api_key)
+    
+    async def process_payment(self, amount: Money, method: PaymentMethod) -> PaymentResult:
+        # Stripe API 호출
+        response = await self.client.charges.create(
+            amount=amount.to_cents(),
+            currency=amount.currency,
+            source=method.token
+        )
+        return PaymentResult(
+            transaction_id=response.id,
+            status="SUCCESS"
+        )
+```
+
+### 3.3 Port가 불필요한 경우
+
+* 단일 구현체만 존재하고, 교체 가능성이 거의 없는 경우
+* **과도한 추상화**로 오히려 코드 복잡도를 높이지 않도록 주의
+* 예시:
+
+  ```python
+  # ❌ 불필요한 Port
+  class UserRepositoryPort(ABC):
+      @abstractmethod
+      async def find_by_id(self, user_id: str):
+          pass
+
+  # ✅ 직접 구현
+  class UserRepository:
+      """구현체가 하나뿐이고 변경 가능성 낮음"""
+      
+      def __init__(self, db: Database):
+          self.db = db
+      
+      async def find_by_id(self, user_id: str) -> Optional[User]:
+          # 직접 구현
+          pass
+  ```
+
+---
+
+## 4. 모듈별 디자인 패턴 적용
+
+### 4.1 모듈 구조 예시
+
+```plaintext
+# module/order/
+├── domain/
+│   ├── entities.py      # Order, OrderItem 등의 엔티티
+│   ├── value_objects.py # Money, Address 값 객체
+│   └── events.py        # OrderCreated, OrderCancelled 이벤트 등
+├── application/
+│   ├── use_cases/       # 복잡한 비즈니스 로직만 유즈케이스로 구현
+│   │   ├── create_order.py
+│   │   └── cancel_order.py
+│   └── ports/           # 외부 시스템 인터페이스만
+│       ├── payment_port.py
+│       └── notification_port.py
+├── infrastructure/
+│   ├── adapters/        # Port 구현체
+│   │   ├── stripe_adapter.py
+│   │   └── email_adapter.py
+│   └── repositories/    # DB 접근, DB 스키마 정의
+│       └── order_repository.py
+└── interfaces/
+    └── rest/
+        └── order_controller.py
+```
+
+* **domain**: 순수 도메인 로직, 엔티티, 값 객체, 이벤트 정의
+* **application**: 유즈케이스, Port 인터페이스 정의
+* **infrastructure**: 실제 Adapter 구현체(외부 API, DB 접근 등)
+* **interfaces**: UI나 API 등 외부와의 인터페이스 계층
+
+### 4.2 의존성 주입 설정
+
+```python
+# 런타임 구현체 선택
+class PaymentServiceFactory:
+    """설정에 따라 적절한 결제 서비스 선택"""
+    
+    @staticmethod
+    def create(config: Config) -> PaymentPort:
+        if config.payment_provider == "stripe":
+            return StripeAdapter(config.stripe_api_key)
+        elif config.payment_provider == "paypal":
+            return PayPalAdapter(config.paypal_credentials)
+        else:
+            raise ValueError(f"Unknown payment provider: {config.payment_provider}")
+
+# FastAPI 의존성 주입
+def get_payment_service(config: Config = Depends(get_config)) -> PaymentPort:
+    return PaymentServiceFactory.create(config)
+```
+
+* **런타임 의존성**: 설정 파일이나 환경 변수에 따라 Port 구현체를 동적으로 선택
+* **테스트 모드**: 테스트용 Mock 또는 Stub으로 쉽게 교체
+
+---
+
+## 5. 실용적인 적용 지침
+
+### 5.1 결정 플로우차트
+
+```mermaid
+graph TD
+    A[기능 구현 필요] --> B{복잡한 비즈니스 로직?}
+    B -->|Yes| C[유즈케이스 구현]
+    B -->|No| D{단순 CRUD?}
+    D -->|Yes| E[라우터에서 직접 처리]
+    D -->|No| F{외부 시스템 연동?}
+    F -->|Yes| G{교체 가능성?}
+    G -->|Yes| H[Port/Adapter 패턴]
+    G -->|No| I[직접 구현]
+    F -->|No| J[도메인 서비스 또는 Repository]
+```
+
+* **Yes** 선택이 많을수록 유즈케이스 및 Port/Adapter 사용을 고려
+* **No**가 많으면 단순 구현(직접 구현)을 우선 고려
+
+### 5.2 안티패턴 회피
+
+```yaml
+피해야 할 패턴:
+  - 과도한 추상화:
+    * 모든 것에 인터페이스 정의
+    * 변경 가능성 없는 기능에 Port 적용
+    * 단순 기능에도 유즈케이스 무조건 적용
+  - 불충분한 추상화:
+    * 외부 API를 직접 컨트롤러에서 호출
+    * 비즈니스 로직을 컨트롤러에 혼재
+    * 도메인 로직을 Repository에 혼재
+  - 잘못된 책임 할당:
+    * Repository에 복잡한 비즈니스 로직을 넣기
+    * 유즈케이스에서 데이터 변환(프레젠테이션 로직)을 과도하게 처리
+    * 컨트롤러에서 검증 로직, 상태 전이 로직 등을 지나치게 구현
+```
+
+### 5.3 실무 체크리스트
+
+```yaml
+구현 전 확인사항:
+  □ 이 기능이 복잡한 비즈니스 프로세스인가?
+  □ 여러 엔티티가 상호작용하는가?
+  □ 트랜잭션 관리가 필요한가?
+  □ 외부 시스템과 연동하는가?
+  □ 구현체가 변경될 가능성이 있는가?
+  □ 테스트 시 Mock이 필요한가?
+
+결정 가이드:
+  - 3개 이상 Yes → 유즈케이스 + Port/Adapter 적극 활용
+  - 1~2개 Yes → 상황에 따라 유즈케이스 또는 Port 중 선택
+  - 모두 No → 단순 CRUD나 조회, 직접 구현
+```
+
+---
+
+## 6. 추가 보완 사항
+
+* **도메인 이벤트 활용**
+
+  * 유즈케이스 내에서 상태 전이 후 필요한 후속 로직(알림, 로그 적재 등)은 **도메인 이벤트** 발행으로 캡슐화
+  * 이벤트 핸들러를 별도 모듈에서 관리하여 **관심사 분리** 실현
+
+* **트랜잭션 범위 주의**
+
+  * Redis, DB, 외부 API 연동 등이 혼재될 경우, **트랜잭션 경계**를 명확히 구분하거나 **Saga 패턴** 등을 검토
+  * 분산 트랜잭션의 경우 복잡도가 크게 증가하므로, **이벤트 소싱**이나 **보상 트랜잭션** 방식으로 대체 가능성 검토
+
+* **테스트 전략**
+
+  * **Unit Test**: 유즈케이스 별로 Mock Port 등을 사용하여 비즈니스 로직 검증
+  * **Integration Test**: 어댑터와 실제 외부 시스템 연동 여부 확인
+  * **End-to-End Test**: 인터페이스(REST API 등)를 통해 전체 시나리오 테스트
+
+* **패턴 적용 범위 최소화**
+
+  * 목적 없이 모든 곳에 패턴을 적용하면 오히려 복잡도와 유지보수 비용이 증가
+  * ‘패턴 적용’ 자체보다 **비즈니스 가치를 빠르고 정확하게 제공**하는 것이 우선
+
+---
+
+> **본 지침은 권장 사항이자 실무에서 검증된 예시에 기반합니다.**
+> 상황에 따라 일부 변형하거나 간소화할 수 있으며, 궁극적인 목표는 **코드 유지보수성과 확장성**을 극대화하는 것입니다.
+> 불필요한 추상화는 지양하고, 비즈니스 가치를 명확히 구현할 수 있도록 선별적으로 적용하시기 바랍니다.
