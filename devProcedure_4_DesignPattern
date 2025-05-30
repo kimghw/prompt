@@ -1,3 +1,5 @@
+# 디자인 패턴 가이드 (v1.0)
+
 아래 지침은 프로젝트 전반에 걸쳐 유즈케이스(Use Case) 및 Port/Adapter 패턴을 적용할 때 따라야 할 기준을 정리한 것입니다. 복잡도와 유지보수성을 고려하여 꼭 필요한 경우에만 패턴을 적용하고, 불필요한 추상화를 지양함으로써 코드의 가독성과 확장성을 균형 있게 확보하고자 합니다.
 
 ---
@@ -327,7 +329,166 @@ graph TD
 
 ---
 
-## 6. 추가 보완 사항
+## 6. 추가 디자인 패턴
+
+### 6.1 Repository 패턴
+
+```python
+class Repository(ABC):
+    """저장소 기본 인터페이스"""
+    
+    @abstractmethod
+    async def find_by_id(self, id: str) -> Optional[Entity]:
+        pass
+    
+    @abstractmethod
+    async def save(self, entity: Entity) -> None:
+        pass
+    
+    @abstractmethod
+    async def delete(self, id: str) -> None:
+        pass
+
+class UserRepository(Repository):
+    """사용자 저장소 구현"""
+    
+    def __init__(self, db: Database):
+        self.db = db
+    
+    async def find_by_id(self, id: str) -> Optional[User]:
+        # DB 쿼리 구현
+        pass
+    
+    async def find_by_email(self, email: str) -> Optional[User]:
+        # 추가 쿼리 메서드
+        pass
+```
+
+### 6.2 Factory 패턴
+
+```python
+class ServiceFactory:
+    """서비스 생성 팩토리"""
+    
+    @staticmethod
+    def create_notification_service(type: str) -> NotificationService:
+        if type == "email":
+            return EmailNotificationService()
+        elif type == "sms":
+            return SMSNotificationService()
+        elif type == "push":
+            return PushNotificationService()
+        else:
+            raise ValueError(f"Unknown notification type: {type}")
+```
+
+### 6.3 Observer 패턴 (이벤트 기반)
+
+```python
+class EventPublisher:
+    """이벤트 발행자"""
+    
+    def __init__(self):
+        self._subscribers = defaultdict(list)
+    
+    def subscribe(self, event_type: str, handler: Callable):
+        self._subscribers[event_type].append(handler)
+    
+    async def publish(self, event: Event):
+        handlers = self._subscribers.get(type(event).__name__, [])
+        for handler in handlers:
+            await handler(event)
+
+# 사용 예시
+publisher = EventPublisher()
+publisher.subscribe("OrderCreated", send_order_confirmation)
+publisher.subscribe("OrderCreated", update_inventory)
+```
+
+### 6.4 Strategy 패턴
+
+```python
+class PricingStrategy(ABC):
+    """가격 책정 전략 인터페이스"""
+    
+    @abstractmethod
+    def calculate_price(self, base_price: float, quantity: int) -> float:
+        pass
+
+class RegularPricing(PricingStrategy):
+    def calculate_price(self, base_price: float, quantity: int) -> float:
+        return base_price * quantity
+
+class BulkPricing(PricingStrategy):
+    def calculate_price(self, base_price: float, quantity: int) -> float:
+        if quantity > 10:
+            return base_price * quantity * 0.9
+        return base_price * quantity
+
+class PriceCalculator:
+    def __init__(self, strategy: PricingStrategy):
+        self.strategy = strategy
+    
+    def calculate(self, base_price: float, quantity: int) -> float:
+        return self.strategy.calculate_price(base_price, quantity)
+```
+
+---
+
+## 7. 테스트 전략
+
+### 7.1 유닛 테스트
+
+```python
+class TestCreateOrderUseCase:
+    """유즈케이스 테스트"""
+    
+    async def test_successful_order_creation(self):
+        # Given: Mock 의존성 설정
+        mock_repo = Mock(OrderRepository)
+        mock_inventory = Mock(InventoryService)
+        mock_payment = Mock(PaymentService)
+        mock_publisher = Mock(EventPublisher)
+        
+        use_case = CreateOrderUseCase(
+            mock_repo, mock_inventory, mock_payment, mock_publisher
+        )
+        
+        # When: 유즈케이스 실행
+        command = CreateOrderCommand(
+            customer_id="123",
+            items=[OrderItem("product1", 2)]
+        )
+        result = await use_case.execute(command)
+        
+        # Then: 검증
+        assert result.status == "CREATED"
+        mock_repo.save.assert_called_once()
+        mock_publisher.publish.assert_called_once()
+```
+
+### 7.2 통합 테스트
+
+```python
+class TestOrderIntegration:
+    """통합 테스트"""
+    
+    async def test_order_creation_flow(self, test_db):
+        # 실제 DB와 연동하여 전체 플로우 테스트
+        repo = OrderRepository(test_db)
+        use_case = CreateOrderUseCase(repo, ...)
+        
+        # 주문 생성
+        result = await use_case.execute(command)
+        
+        # DB에서 확인
+        saved_order = await repo.find_by_id(result.order_id)
+        assert saved_order is not None
+```
+
+---
+
+## 8. 추가 보완 사항
 
 * **도메인 이벤트 활용**
 
@@ -348,7 +509,7 @@ graph TD
 * **패턴 적용 범위 최소화**
 
   * 목적 없이 모든 곳에 패턴을 적용하면 오히려 복잡도와 유지보수 비용이 증가
-  * ‘패턴 적용’ 자체보다 **비즈니스 가치를 빠르고 정확하게 제공**하는 것이 우선
+  * '패턴 적용' 자체보다 **비즈니스 가치를 빠르고 정확하게 제공**하는 것이 우선
 
 ---
 
