@@ -20,7 +20,7 @@
     - 메시지 브로커의 크기 제한 확인
     - Large payload 처리 전략 (S3 reference 등)
   
-  보안:
+  보안(미선택):
     - 민감 정보 암호화
     - 이벤트 접근 권한 관리
 
@@ -30,12 +30,12 @@ API 버전 관리:
   - Header 버전: Accept-Version: 1.0
   - 하위 호환성 유지 기간
   
-Rate Limiting:
+Rate Limiting(미선택):
   - API별 제한 정책
   - 사용자/IP별 제한
   - Throttling 응답 처리
   
-보안:
+보안(미선택):
   - 인증/인가 메커니즘
   - CORS 정책
   - Input validation
