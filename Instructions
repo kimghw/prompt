@@ -62,6 +62,8 @@
 ### 단위테스트 완료시 ./tests/completed 폴더에 이동한다.
 ### .clineignore 에 ./tests/completed 를 추가 한다.
 
+### 부분 테스트를 위해 각 모듈에 각각 관련되어 있는 폴더와 파일(루트인 경우) 리스트를 readme.md 파일이 작성
+
 
 ## ⚠️ 주의사항
 
