@@ -270,6 +270,9 @@ def get_payment_service(config: Config = Depends(get_config)) -> PaymentPort:
 * **런타임 의존성**: 설정 파일이나 환경 변수에 따라 Port 구현체를 동적으로 선택
 * **테스트 모드**: 테스트용 Mock 또는 Stub으로 쉽게 교체
 
+### 4.3 인테퍼이스 - CLI/RestAPI
+#  Shared Business Logic Pattern
+
 ---
 
 ## 5. 실용적인 적용 지침
