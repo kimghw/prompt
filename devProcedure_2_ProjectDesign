@@ -36,7 +36,9 @@ TextExtracted:
    - 이벤트 중심 설계 원칙
    - 데이터 저장 및 참조 방식 
    - 모듈간 완전한 독립성 보장
-2.  공유 저장소 전략:
+2. **인터페의스**
+   - Shared Business Logic Pattern 구현
+3.  공유 저장소 전략:
   1.2.1.  (선택시)Object Storage (S3/MinIO):
      - 원본 문서 (PDF, HTML 등)
      - 추출된 텍스트 청크
@@ -49,7 +51,7 @@ TextExtracted:
      - 이벤트 히스토리
      - 처리 상태 변경 이벤트
      - 에러 이벤트
-3. 전체 파이프라인 이벤트 흐름(예시)
+4. 전체 파이프라인 이벤트 흐름(예시)
 graph LR
     A[PDF Upload] -->|document.ingested| B[Kafka]
     B -->|consume| C[Processing Module]
