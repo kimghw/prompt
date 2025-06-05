@@ -64,6 +64,7 @@
 - ** /src 폴더의 구현체만 사용
 - ** kafka 서버의 토픽 리스트 확인
 - ** Kafka 메시지 포맷팅 및 조회 스크립트
+- ** (요청시) send_{topic_name}_topic_event  형식으로 보내는 토픽
 
 (사용자 요청 시)
 ## 📁 .MemoryBank 관리 지침
