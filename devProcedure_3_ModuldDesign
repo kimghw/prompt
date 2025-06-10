@@ -32,7 +32,7 @@
 module_name/
 ├── models/          # 데이터 모델
 │   └── email.py
-├── business/        # 비즈니스 로직  
+├── business/        # 비즈니스 로직  / 모듈러의 컨트롤 역할
 │   └── email_processor.py
 ├── storage/         # 데이터 저장
 │   └── email_repository.py
