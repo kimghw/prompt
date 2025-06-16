@@ -45,8 +45,6 @@
 - schema.py를 통한 데이터 계약 활용
 - %주의% 모듈간 순환 참조 제거
 
-
-
 ## 로그, 예외처리
 - 단계별 로깅: DEBUG(개발), INFO(비즈니스), WARN(주의), ERROR(에러)
 - 설정에서 로그 모델 선택(기본은 debug)
@@ -56,6 +54,11 @@
 - root에 readme.md  및 외부 db나 API에 관한 설명문서
 - 클래스 다이어그램 자동생성 도구 사용
 
+## Implementation_plan.md 작성 요령
+- 전체적인 개략 은 root 폴더에 작성
+- 모듈간 호출 및 반환 할때 사용하는 스미마는 root이 schema.py 에 정의 및 데이터 파이프라인 설명/설명
+- 각 서브 폴더/모듈의 {module}_imlementation_plan.md 를 작성
+- 각 서브 모듈의 데이터 스키마 작성 및 데이터 파이프라인 설명/작성
 
 instruction
 - 스키마 변경 시 어느 모듈이 영향 받는지 우선 분석(main 오케스트레이터 참조, readme.md 확인)
