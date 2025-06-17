@@ -45,7 +45,7 @@
 - 모듈 간 계약의 실용적 구현 필요
 - module : orchestrator.py, 단일기능 파일, repository.py(DB, API), schemak.py(Pydantic 모델), __init__.py 구성
 - schema.py를 통한 데이터 계약 활용
-- utils 폴더에는 간단한 함수들 정의
+- utils 폴더에는 간단한 함수들 정의(파싱, 정제,날짜 등)
 - %주의% 모듈간 순환 참조 제거
 
 ## 로그, 예외처리
