@@ -140,7 +140,7 @@
   "section_reference": "최하위절번호",
   "title": "테이블 제목",
   "summary": "테이블 요약", 
-  "markdown_content": "| Header 1 | Header 2 |\n|----------|----------|\n| Data 1   | Data 2   |",
+  "markdown_content": "소스파일에서 추출한 내용",
   "row_count": 행수,
   "has_notes": true/false
 }
