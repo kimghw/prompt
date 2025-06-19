@@ -59,7 +59,7 @@
   "revision_date": "개정일",
   "implementation_date": "시행일",
   "applicable_to" : "적용 대상 선박/시스템 , 없으면 not defiend"
-  "parent_id": "상위 문서의 section_id (최상위면 null)",
+  "parent_id": "상위 section_id (최상위면 null)",
   "section_id": "절 번호",
   "split_no": "분리 번호/총 수",
   "hierarchy_no": "섹션 계층 번호",
@@ -72,7 +72,7 @@
     }
   ],
   "total_token_count": "전체 토큰 수",
-  "related_tables": ["subsection_id-Table1"],
+  "related_tables": ["section_id-Table1"],
   "related_notes": ["section_id-Note_001"],
   "related_figures": ["section_id-Fig_001"],
   "related_appendix": ["section_id-Appendix_001"],
@@ -88,8 +88,7 @@
 #### 3.2.1 필수 필드
 - **document_type**: 문서 유형 (UR/PR/UI/Appendix)
 - **document_id**: 문서 고유 식별자
-- **section_id**: 절 번호
-- **subsection_id**: 관련 하위 절 번호
+- **section_id**: 관련/소속 절 번호
 - **section_title**: 절 제목
 - **parent_id**: 상위 섹션 ID
 - **total_token_count**: 해당 절의 총 토큰 수
