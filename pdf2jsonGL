@@ -58,7 +58,7 @@
   "doc_version": "버전 정보",
   "revision_date": "개정일",
   "implementation_date": "시행일",
-  "applicable_to" : "적용 범위", 없으면 'not defiend"
+  "applicable_to" : "적용 대상 선박/시스템 , 없으면 not defiend"
   "parent_id": "상위 문서의 section_id (최상위면 null)",
   "section_id": "절 번호",
   "split_no": "분리 번호/총 수",
@@ -72,19 +72,14 @@
     }
   ],
   "total_token_count": "전체 토큰 수",
-  "related_tables": ["document_id-Table1"],
-  "related_notes": ["document_id-Note_001"],
-  "related_figures": ["document_id-Fig_001"],
-  "related_appendix": ["document_id-Fig_001"],
+  "related_tables": ["section_id-Table1"],
+  "related_notes": ["section_id-Note_001"],
+  "related_figures": ["section_id-Fig_001"],
+  "related_appendix": ["section_id-Appendix_001"],
   "cross_references": ["참조하는 다른 문서/절"],
   "content_format": "markdown",
   "language": "eng",
   "content": "# 절 제목\n\n원문 그대로 마크다운 형식으로",
-  "metadata": {
-    "page_numbers": "1-5",
-    "revision_history": [],
-    "applicable_to": "적용 대상 선박/시스템"
-  }
 }
 ```
 
