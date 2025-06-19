@@ -162,10 +162,10 @@ $$
   "document_id": "문서ID",
   "title": "테이블 이름",
   "section_reference": "최하위절번호",
-  "caption": "내용을 이해하는 데 필요한 맥락"
+  "caption": "내용을 이해하는 데 필요한 맥락/설명이 가능하고 content가 700토큰을 넘지 않은 경우"
   "summary": "테이블 요약",
   "sheet":"시트 넘버", // 없으면 null
-  "markdown_content": "소스파일에서 추출한 내용",
+  "content": "소스파일에서 추출한 내용",
   "row_count": "행수",
   "has_notes": true/false
 }
