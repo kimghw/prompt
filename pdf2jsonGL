@@ -30,6 +30,7 @@
 ### 2.2 추출 단위
 - **문서 타입**: UR, PR, UI, Appendix 등
 - **문서 번호**: 예) UR G1, UR G2, UR G3, UR Z15 등)
+- **적용 범위**:
 - **본문 상위 절**: 1. General, 2. Definitions, 3. Requirements, ANNEX 등
 - **계층**: 콘텐츠가 몇 번째 서브 섹션인지 기록
 - **추가 분리**: 기본 단위 절이 750토큰 초과 시 500토큰 단위로 분리
@@ -57,6 +58,7 @@
   "doc_version": "버전 정보",
   "revision_date": "개정일",
   "implementation_date": "시행일",
+  "applicable_to" : "적용 범위", 없으면 'not defiend"
   "parent_id": "상위 문서의 section_id (최상위면 null)",
   "section_id": "절 번호",
   "split_no": "분리 번호/총 수",
