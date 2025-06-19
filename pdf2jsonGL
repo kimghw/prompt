@@ -44,7 +44,7 @@
   "section_title": "절 제목",
   "subsections": [
     {
-      "id": "{토큰수}**하위절 번호_햐위절제목"
+      "id": "(토큰수)하위절 번호_햐위절제목"
     }
   ],
   "total_token_count": 전체토큰수,
