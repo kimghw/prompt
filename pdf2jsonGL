@@ -32,6 +32,7 @@
 - **분리 시 ID** : 분리시에 split_no 작성
 - **분리 시 상위 절 명시 ** : ParrentID 작성
 - **포함 내용**: 해당 절의 모든 하위 절 내용
+- **Subsections**: 동일한 레벨의 것만 포함할 것. 
 
 ## 3. JSON 구조 규격
 
@@ -44,9 +45,9 @@
   "split_no": " 분리 번호".
   "parrent_id": "상위 문서의 section_id" 
   "section_title": "절 제목",
-  "subsections": [
+  "subsections": [     
     {
-      "id": "(토큰수)하위절 번호_햐위절제목"
+      "id": "(토큰 수 추가)하위절 번호_햐위절제목"
     }
   ],
   "total_token_count": 전체토큰수,
