@@ -162,6 +162,7 @@ $$
   "document_id": "문서ID",
   "title": "테이블 이름",
   "section_reference": "최하위절번호",
+  "caption": "내용을 이해하는 데 필요한 맥락"
   "summary": "테이블 요약",
   "sheet":"시트 넘버", // 없으면 null
   "markdown_content": "소스파일에서 추출한 내용",
@@ -191,7 +192,7 @@ $$
   "section_reference": "최하위절번호",
   "title": "그림 제목",
   "type": "도면유형",
-  "caption": "그림 설명",
+  "caption": "내용을 이해하는 데 필요한 맥락"
   "related_content": "관련 내용",
   "page": "페이지번호",
   "image_url": "https://assets.example.com/iacs/G1/fig001.png"
