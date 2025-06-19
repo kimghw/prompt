@@ -29,7 +29,7 @@
 - **기본 단위**: 최상위 절
 - **예시**: 1. Application, 2. Definitions, 3. Special Survey 등
 - **추가 분리** : 기본 단위 절이 750토큰 초과 시에 최상위 절을 500토큰 단위로 분리
-- **분리 시 ID** : 분리시에 split_id 작성
+- **분리 시 ID** : 분리시에 split_no 작성
 - **분리 시 상위 절 명시 ** : ParrentID 작성
 - **포함 내용**: 해당 절의 모든 하위 절 내용
 
@@ -39,8 +39,10 @@
 ```json
 {
   "document_id": "문서 식별자",
+  "doc_version": "1.2"
   "section_id": "절 번호",
   "split_no": " 분리 번호".
+  "parrent_id": "상위 문서의 section_id" 
   "section_title": "절 제목",
   "subsections": [
     {
@@ -48,9 +50,9 @@
     }
   ],
   "total_token_count": 전체토큰수,
-  "related_tables": ["테이블ID배열"],
-  "related_notes": ["노트ID배열"],
-  "related_figures": ["그림ID배열"],
+  "related_tables": ["Z29_Table1"],
+  "related_notes": ["Z29_Note_003"],
+  "related_figures": ["Z29_Fig_001"],
   "content_format": "markdown",
   "content": "# 절 제목\n\n## 하위절\n\n실제 마크다운 내용..."
 }
@@ -63,7 +65,7 @@
 - **section_id**: 최상위 절 번호 (예: "1", "2", "3")
 - **section_title**: 절 제목
 - **total_token_count**: 해당 절의 총 토큰 수
-- **split_id**: 분리절, 하위절 아님
+- **split_no**: 분리절, 하위절 아님
 - **content_format**: "markdown" (고정값)
 - **content**: Markdown 형식의 절 내용
 
