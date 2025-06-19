@@ -15,6 +15,7 @@
 - 750 토큰 기준 분할 결정
 - 텍스트와 비텍스트 요소의 분리 관리
 - 참조 무결성 유지
+- Markdown 형식으로 콘텐츠 표준화
 
 ## 2. 문서 구조화 절차
 
@@ -50,7 +51,8 @@
   "related_tables": ["테이블ID배열"],
   "related_notes": ["노트ID배열"],
   "related_figures": ["그림ID배열"],
-  "content": "실제 텍스트 내용"
+  "content_format": "markdown",
+  "content": "# 절 제목\n\n## 하위절\n\n실제 마크다운 내용..."
 }
 ```
 
@@ -63,7 +65,8 @@
 - **subsections**: 하위 절 정보 배열
 - **total_token_count**: 해당 절의 총 토큰 수
 - **split_required**: 750 토큰 초과 여부 (boolean)
-- **content**: 절의 전체 텍스트 내용
+- **content_format**: "markdown" (고정값)
+- **content**: Markdown 형식의 절 내용
 
 #### 3.2.2 선택 필드
 - **char_count**: 문자 수 (공백 포함)
@@ -71,11 +74,62 @@
 - **related_notes**: 관련 노트/풋노트 ID 배열
 - **related_figures**: 관련 그림 ID 배열
 
-### 3.3 토큰 계산 기준
+### 3.3 Markdown 변환 규칙
+
+#### 3.3.1 제목 계층
+```markdown
+# 1. Main Section Title
+## 1.1 Subsection Title
+### 1.1.1 Sub-subsection Title
+```
+
+#### 3.3.2 목록 변환
+```markdown
+**번호 목록:**
+1. First item
+2. Second item
+   - Sub-item
+   - Another sub-item
+
+**불릿 목록:**
+- Item one
+- Item two
+  - Nested item
+```
+
+#### 3.3.3 강조 표현
+```markdown
+**굵은 글씨** 또는 __굵은 글씨__
+*이탤릭* 또는 _이탤릭_
+***굵은 이탤릭***
+```
+
+#### 3.3.4 정의 및 용어
+```markdown
+**Remote Survey**: A process of verifying that a ship and its equipment are in compliance...
+
+또는
+
+**용어 정의:**
+- **Securing device**: A device used to keep the door closed...
+- **Supporting device**: A device used to transmit external...
+```
+
+#### 3.3.5 참조 표시
+```markdown
+- 자세한 내용은 [Table 1](#Z29_Table1) 참조
+- 관련 그림은 [Figure 1](#Z24_Fig_001) 참조
+- Note[^1] 참조
+
+[^1]: This UR is to be uniformly implemented...
+```
+
+### 3.4 토큰 계산 기준
 - 영어 기준: 1 토큰 ≈ 4자
 - 분할 기준점: 750 토큰
 - 750 토큰 이하: split_required = false
 - 750 토큰 초과: split_required = true
+- Markdown 마크업은 토큰 계산에 포함
 
 ## 4. 보조 요소 관리
 
@@ -87,6 +141,7 @@
   "section_reference": "최하위절번호",
   "title": "테이블 제목",
   "summary": "테이블 요약",
+  "markdown_content": "| Header 1 | Header 2 |\n|----------|----------|\n| Data 1   | Data 2   |",
   "row_count": 행수,
   "has_notes": true/false
 }
@@ -99,12 +154,12 @@
   "document_id": "문서ID",
   "section_reference": "최하위절번호",
   "type": "note/footnote",
-  "summary": "노트 요약",
+  "markdown_content": "**Note**: This requirement applies to...",
   "keywords": ["키워드배열"]
 }
 ```
 
-### 4.3 그림 구조 (업데이트)
+### 4.3 그림 구조
 ```json
 {
   "figure_id": "고유ID",
@@ -112,7 +167,8 @@
   "section_reference": "최하위절번호",
   "title": "그림 제목",
   "type": "도면유형",
-  "summary": "그림 설명",
+  "caption": "그림 설명",
+  "markdown_reference": "![그림 제목](#figure_id)",
   "page": 페이지번호,
   "image_format": "base64",
   "image_data": "data:image/png;base64,iVBORw0KGgoAAAANS...",
@@ -121,26 +177,42 @@
 }
 ```
 
-### 4.4 그림 처리 세부사항
+### 4.4 Markdown 콘텐츠 예시
 
-#### 4.4.1 Base64 인코딩 규격
-- **지원 형식**: PNG, JPEG, SVG
-- **최대 크기**: 5MB (인코딩 전)
-- **권장 해상도**: 300 DPI
-- **데이터 형식**: "data:image/[type];base64,[data]"
+#### 4.4.1 절 내용 예시
+```markdown
+# 2. Requirements for equivalency
 
-#### 4.4.2 그림 추출 절차
-1. PDF에서 이미지 추출
-2. 이미지 품질 확인 (해상도, 선명도)
-3. 필요시 이미지 최적화
-4. Base64 인코딩
-5. 메타데이터 추가
+The requirements for equivalency of a remote survey to a survey attended on board by a Surveyor include:
 
-#### 4.4.3 이미지 최적화 가이드라인
-- **기술 도면**: PNG 형식 권장
-- **사진**: JPEG 형식 권장
-- **다이어그램**: SVG 형식 권장 (가능한 경우)
-- **압축률**: 품질 손실 최소화하면서 크기 최적화
+- eligibility of the remote survey
+- qualification of Surveyors
+- planning of the remote survey
+- performance of the remote survey
+- assessment of the remote survey
+- reporting
+
+## 2.1 Eligibility of the remote survey
+
+Eligibility of the remote survey is to be decided based on type and scope of the requested survey, in accordance with [3.1](#section-3.1) and, if applicable, flag State Administration acceptance.
+
+**Note**: A remote survey is deemed eligible when it provides the same level of assurance[^1].
+
+[^1]: According to the requirements for equivalency specified in section 2.
+```
+
+#### 4.4.2 테이블 Markdown 예시
+```markdown
+| No. | Survey Type | Live Streaming Required |
+|-----|------------|-------------------------|
+| 1   | Postponement of Class | X (1) |
+| 2   | Annual Survey | X |
+| 3   | Special Survey | X (1)(2) |
+
+**Notes:**
+- (1) Live streaming may not be required for minor survey scope
+- (2) Pure documentary verifications are eligible
+```
 
 ## 5. ID 명명 규칙
 
@@ -167,98 +239,107 @@
 2. 목차 구조 추출
 3. 페이지별 요소 식별
 
-### 6.2 2단계: 텍스트 추출
+### 6.2 2단계: 텍스트 추출 및 변환
 1. 최상위 절 단위로 텍스트 추출
-2. 하위 절 구조 보존
-3. 토큰 수 계산
+2. Markdown 형식으로 변환
+3. 하위 절 구조 보존
+4. 토큰 수 계산
 
 ### 6.3 3단계: 보조 요소 추출
-1. 테이블 식별 및 메타데이터 추출
-2. 노트/풋노트 식별 및 분류
+1. 테이블 식별 및 Markdown 변환
+2. 노트/풋노트 식별 및 Markdown 변환
 3. 그림 식별, 추출 및 Base64 인코딩
 
 ### 6.4 4단계: 관계 설정
 1. 각 요소의 section_reference 설정
 2. 메인 텍스트의 related_* 배열 구성
-3. 참조 무결성 검증
+3. Markdown 내 참조 링크 생성
+4. 참조 무결성 검증
 
 ### 6.5 5단계: 검증
 1. 모든 필수 필드 확인
 2. ID 중복 검사
 3. 참조 관계 검증
-4. Base64 인코딩 유효성 확인
+4. Markdown 문법 검증
+5. Base64 인코딩 유효성 확인
 
 ## 7. 품질 관리
 
 ### 7.1 검증 항목
 - [ ] 모든 절이 추출되었는가?
+- [ ] Markdown 변환이 올바른가?
 - [ ] 토큰 수가 정확히 계산되었는가?
 - [ ] 모든 테이블/노트/그림이 식별되었는가?
 - [ ] section_reference가 올바른가?
 - [ ] ID 명명 규칙을 준수했는가?
+- [ ] Markdown 링크가 유효한가?
 - [ ] 그림의 Base64 인코딩이 유효한가?
-- [ ] 이미지 크기가 제한 내에 있는가?
 
-### 7.2 그림 품질 검증
-- [ ] 이미지 해상도가 충분한가? (최소 150 DPI)
-- [ ] 텍스트가 읽을 수 있는가?
-- [ ] 도면의 선이 명확한가?
-- [ ] 파일 크기가 적절한가? (5MB 이하)
+### 7.2 Markdown 품질 검증
+- [ ] 제목 계층이 올바른가?
+- [ ] 목록 형식이 일관적인가?
+- [ ] 테이블이 올바르게 표시되는가?
+- [ ] 링크와 참조가 작동하는가?
+- [ ] 특수 문자가 올바르게 이스케이프되었는가?
 
 ### 7.3 오류 처리
 - 누락된 요소 발견 시 재추출
+- Markdown 변환 오류 시 수정
 - 토큰 수 오류 시 재계산
 - 참조 오류 시 관계 재설정
-- 이미지 품질 부족 시 재추출 또는 개선
 
 ## 8. 향후 처리 지침
 
 ### 8.1 분할 처리 (split_required = true)
 1. 하위 절 단위로 재분할 검토
-2. 의미적 단위 유지
-3. 750 토큰 이하로 분할
+2. Markdown 제목 구조 유지
+3. 의미적 단위 보존
+4. 750 토큰 이하로 분할
 
 ### 8.2 병합 처리 (선택사항)
 1. 매우 작은 절들의 병합 검토
 2. 관련성 높은 절들의 그룹화
-3. 750 토큰 한도 내 병합
-
-### 8.3 이미지 관리
-1. 대용량 이미지는 별도 스토리지 고려
-2. 썸네일 생성 옵션
-3. 이미지 CDN 활용 검토
+3. Markdown 구조 통합
+4. 750 토큰 한도 내 병합
 
 ## 9. 부록
 
 ### 9.1 토큰 수 추정 공식
 - 영어: 문자 수 ÷ 4 = 토큰 수 (근사치)
 - 기술 문서: 문자 수 ÷ 5 = 토큰 수 (전문 용어 고려)
+- Markdown 포함: 마크업 문자 포함하여 계산
 
-### 9.2 일반적인 절 크기
-- 소형: < 200 토큰
-- 중형: 200-500 토큰
-- 대형: 500-750 토큰
-- 초대형: > 750 토큰 (분할 필요)
-
-### 9.3 Base64 인코딩 예시
+### 9.2 Markdown 변환 도구
 ```python
-import base64
-
-def image_to_base64(image_path, image_type='png'):
-    with open(image_path, 'rb') as img_file:
-        encoded = base64.b64encode(img_file.read()).decode('utf-8')
-    return f"data:image/{image_type};base64,{encoded}"
+def convert_to_markdown(text, section_level=1):
+    """텍스트를 Markdown으로 변환"""
+    # 제목 변환
+    heading = "#" * section_level
+    # 목록 변환
+    # 강조 변환
+    # 링크 생성
+    return markdown_text
 ```
 
-### 9.4 이미지 크기 권장사항
-- 기술 도면: 1-2 MB
-- 개념도: 500 KB - 1 MB
-- 아이콘/심볼: < 100 KB
-- 복잡한 다이어그램: 2-5 MB
+### 9.3 일반적인 Markdown 패턴
+```markdown
+# 기술 문서 일반 패턴
+
+## 정의 섹션
+**용어**: 설명...
+
+## 요구사항 섹션
+1. 첫 번째 요구사항
+   - 세부 사항 A
+   - 세부 사항 B
+
+## 참조 섹션
+자세한 내용은 [Section 2.1](#section-2-1) 참조
+```
 
 ---
 
-**문서 버전**: 1.1  
+**문서 버전**: 1.2  
 **작성일**: 2024년 12월  
-**수정일**: 2024년 12월 (Base64 이미지 처리 추가)  
+**수정일**: 2024년 12월 (Markdown 형식 추가)  
 **다음 검토일**: 2025년 6월
