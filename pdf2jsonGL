@@ -52,33 +52,33 @@
     }
   ],
   "total_token_count": 전체토큰수,
-  "related_tables": ["document_id-Table1"],                           # 문서가 언급한 테이블 또는 다음 섹션 이전의 테이블
-  "related_notes": ["document_id-Note_003"], note/foonote/etc.,       # 문서가 언급한 note, 마킹 또는 다음 섹션 이전의 노트,마킹
-  "related_figures": ["document_id-Fig_001"], 
-  "related_Annext":
+  "related_tables": ["document_id-Table1"],                           # 문서가 언급한 테이블
+  "related_notes": ["document_id-Note_003"], note/foonote/etc.,       # 문서가 언급한 note, 마킹 
+  "related_figures": ["document_id-Fig_001"],                         # 문서가 언급한 테이블
+  "related_Annext":  ["document_id-Annex_1"],                         # 문서가 언급한 부록
   "content_format": "markdown",
   "language":"kor".
-  "content": "# 절 제목\n\n## 하위절\n\n실제 마크다운 내용..."
+  "content": "# 절 제목\n\n## 하위절\n\n실제 마크다운 내용../ 원문 구대로 작성"
 }
 ```
-
 ### 3.2 필드 설명
 
 #### 3.2.1 필수 필드
-- **document_id**: IACS 문서 고유 식별자 (예: "IACS_URs_ㅈㅈㅈZ29")
+- **document_id**: 문서 고유 식별자 (예: "IACS_URs_Z29")
 - **section_id**: 최상위 절 번호 (예: "1", "2", "3")
 - **section_title**: 절 제목
 - **parent_id** : 상위 섹션, 최상위 이면 null, 직전 상위 id, 2.3.2 이면 2.3, 2.5 이면 2, 2 이면 root 로 표기
 - **total_token_count**: 해당 절의 총 토큰 수
 - **split_no**: 분리절, 하위절 아님
 - **content_format**: "markdown" (고정값)
-- **content**: Markdown 형식의 절 내용
+- **content**: Markdown 형식의 절 내, 원문 그대로
 
 #### 3.2.2 선택 필드
 - **char_count**: 문자 수 (공백 포함)
 - **related_tables**: 관련 테이블 ID 배열
 - **related_notes**: 관련 노트/풋노트 ID 배열
 - **related_figures**: 관련 그림 ID 배열
+- **related_annex*: 관련 부록
 
 ### 3.3 Markdown 변환 규칙
 
@@ -141,6 +141,7 @@
 {
   "table_id": "고유ID",
   "document_id": "문서ID",
+  "title": " 테이블 이름"
   "section_reference": "최하위절번호",
   "title": "테이블 제목",
   "summary": "테이블 요약", 
@@ -155,9 +156,10 @@
 {
   "note_id": "고유ID",
   "document_id": "문서ID",
-  "section_reference": "최하위절번호",#문서 전체인 경우 'general'로 표기
+  "title": 노트/풋노트 이름
+  "section_reference": "관련된 최하위절번호",#문서 전체인 경우 'general'로 표기
   "type": "note/footnote/etc.,",
-  "markdown_content": "**Note**: This requirement applies to...",
+  "related)content": "     ",
   "keywords": ["키워드배열"]
 }
 ```
@@ -171,11 +173,36 @@
   "title": "그림 제목",
   "type": "도면유형",
   "caption": "그림 설명",
-  "markdown_reference": "![Remote Survey Workflow](#Z29_Fig_001)",
+    "related)content": "     ",
   "page": 페이지번호,
   "image_url": "https://assets.example.com/iacs/Z29/fig001.png"
 }
 ```
+
+### 4.4 Annex 구조
+```json
+{
+  "Annex_id": "문서 번호
+  "Annex_title": "탱커 검사 지짐"
+  "section_id": "절 번호",
+  "split_no": "분리 번호/총 수".
+  "related)content": "     ",
+  "hierarchy_no" " 섹션 계층 번호"(Parrent_id 가 null 인 겨우 1 기준)
+  "section_title": "절 제목",
+  "subsections": [     
+    {
+      "id": "(토큰 수 추가)하위절 번호_햐위절제목"
+    }
+  ],
+  "total_token_count": 전체토큰수,
+  "related_tables": ["document_id-Table1"],                           # 문서가 언급한 테이블
+  "related_notes": ["document_id-Note_003"], note/foonote/etc.,       # 문서가 언급한 note, 마킹 
+  "related_figures": ["document_id-Fig_001"],                         # 문서가 언급한 테이블
+  "related_Annext":  ["document_id-Annex_1"],                         # 문서가 언급한 부록
+  "content_format": "markdown",
+  "language":"kor".
+  "content": "# 절 제목\n\n## 하위절\n\n실제 마크다운 내용../ 원문 구대로 작성"
+}
 
 ### 4.4 Markdown 콘텐츠 예시
 
@@ -248,7 +275,7 @@ Eligibility of the remote survey is to be decided based on type and scope of the
 ### 6.3 3단계: 보조 요소 추출
 1. 테이블 식별 및 Markdown 변환
 2. 노트/풋노트 식별 및 Markdown 변환
-3. 그림 식별, 추출 및 Base64 인코딩
+
 
 ### 6.4 4단계: 관계 설정
 1. 각 요소의 section_reference 설정
@@ -261,7 +288,7 @@ Eligibility of the remote survey is to be decided based on type and scope of the
 2. ID 중복 검사
 3. 참조 관계 검증
 4. Markdown 문법 검증
-5. Base64 인코딩 유효성 확인
+
 
 ## 7. 품질 관리
 
