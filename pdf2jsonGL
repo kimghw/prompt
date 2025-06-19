@@ -198,6 +198,17 @@ $$
   "page": "페이지번호",
   "image_url": "https://assets.example.com/iacs/G1/fig001.png"
 }
+
+### 4.4  apppendix 구조
+```json
+{
+  "Appendix_id": "고유ID",
+  "document_id": "문서ID",
+  "Annex_id": "상위 절이름 ",
+  "title": "그림 제목",
+  "content": "관련 내용",
+  "page": "페이지번호",
+}
 ```
 
 ## 5. ID 명명 규칙
