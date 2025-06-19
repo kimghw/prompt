@@ -3,11 +3,11 @@
 ## 1. 개요
 
 ### 1.1 목적
-본 지침서는 IACS(International Association of Classification Societies) 문서를 체계적으로 구조화하고 디지털화하기 위한 표준 절차를 제공합니다.
+본 지침서는 IACS(International Association of Classification Societies) URs 문서를 체계적으로 구조화하고 디지털화하기 위한 표준 절차를 제공합니다.
 
 ### 1.2 적용 범위
 - IACS Unified Requirements (UR) 문서
-- 기타 IACS 기술 문서
+- 기타 IACS URs기술 문서
 - PDF 형식의 구조화된 기술 문서
 
 ### 1.3 주요 원칙
@@ -30,7 +30,7 @@
 - **예시**: 1. Application, 2. Definitions, 3. Special Survey 등
 - **추가 분리** : 기본 단위 절이 750토큰 초과 시에 최상위 절을 500토큰 단위로 분리
 - **분리 시 ID** : 분리시에 split_id 작성
-- **분리 시 상위 절 명시 ** :ParrentID 작성
+- **분리 시 상위 절 명시 ** : ParrentID 작성
 - **포함 내용**: 해당 절의 모든 하위 절 내용
 
 ## 3. JSON 구조 규격
@@ -59,7 +59,7 @@
 ### 3.2 필드 설명
 
 #### 3.2.1 필수 필드
-- **document_id**: IACS 문서 고유 식별자 (예: "IACS_Z29")
+- **document_id**: IACS 문서 고유 식별자 (예: "IACS_URs_ㅈㅈㅈZ29")
 - **section_id**: 최상위 절 번호 (예: "1", "2", "3")
 - **section_title**: 절 제목
 - **total_token_count**: 해당 절의 총 토큰 수
