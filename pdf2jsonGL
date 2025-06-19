@@ -152,7 +152,7 @@
   "note_id": "고유ID",
   "document_id": "문서ID",
   "section_reference": "최하위절번호",#문서 전체인 경우 'general'로 표기
-  "type": "note/footnote",
+  "type": "note/footnote/etc.,",
   "markdown_content": "**Note**: This requirement applies to...",
   "keywords": ["키워드배열"]
 }
@@ -169,7 +169,6 @@
   "caption": "그림 설명",
   "markdown_reference": "![Remote Survey Workflow](#Z29_Fig_001)",
   "page": 페이지번호,
-  "image_format": "base64",
   "image_url": "https://assets.example.com/iacs/Z29/fig001.png"
 }
 ```
