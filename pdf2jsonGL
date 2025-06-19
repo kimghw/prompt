@@ -20,24 +20,24 @@
 ## 2. 문서 구조화 절차
 
 ### 2.1 초기 분석
-1. 문서 타입 식별 (UR, PR, UI, Appendix 등)
+1. 문서 타입 식별 (UR, PR, UI 등)
 2. 문서의 목차 구조/hierarchy 분석
-3. 최상위 절(1, 2, 3, 4...) 식별
+3. 최상위 절(1, 2, 3, 4...APPENDIX) 식별
 4. 하위 절 계층 구조 확인
-5. 테이블, 그림, note/footnote, Annex 위치 파악
+5. 테이블, 그림, note/footnote, Annex 위치 파악 및 sheet 번호
 6. 문서 버전 정보 및 개정 이력 확인
 
 ### 2.2 추출 단위
 - **문서 타입**: UR, PR, UI, Appendix 등
-- **문서 번호**: 예) UR G1, UR G2, UR G3, Z23 Appendix 1
-- **본문 상위 절**: 1. General, 2. Definitions, 3. Requirements, Annex 등
+- **문서 번호**: 예) UR G1, UR G2, UR G3, UR Z15 등)
+- **본문 상위 절**: 1. General, 2. Definitions, 3. Requirements, APPENDIX 등
 - **계층**: 콘텐츠가 몇 번째 서브 섹션인지 기록
 - **추가 분리**: 기본 단위 절이 750토큰 초과 시 500토큰 단위로 분리
 - **분리 시 ID**: split_no 작성
 - **상위 절 명시**: parent_id 작성
 - **포함 내용**: 해당 절의 모든 하위 절 내용
 
-※ Annex는 본문의 최상위 절과 동급으로 처리
+※ Annex는 본문의 상위 절과 동급으로 처리
 
 ### 2.3 문서 타입별 특별 고려사항
 
@@ -46,17 +46,13 @@
 - Revision history 메타데이터로 관리
 - End of Document 마커 처리
 
-#### 2.3.2 Appendix 문서
-- 폼/체크리스트 형식은 구조화된 데이터로 변환
-- 표 형식 데이터는 JSON 객체로 변환 고려
-
 ## 3. JSON 구조 규격
 
 ### 3.1 메인 텍스트 구조
 ```json
 {
-  "document_type": "UR/PR/UI/Appendix",
-  "document_id": "문서 번호 (예: UR G1, Z23 Appendix 1)",
+  "document_type": "UR/PR/UI",
+  "document_id": "문서 번호 (예: UR G1, Z23, Z12.3)",
   "document_title": "문서 제목",
   "doc_version": "버전 정보",
   "revision_date": "개정일",
@@ -66,7 +62,6 @@
   "split_no": "분리 번호/총 수",
   "hierarchy_no": "섹션 계층 번호",
   "section_title": "절 제목",
-  "section_type": "main/annex", 
   "subsections": [
     {
       "id": "하위절 번호",
@@ -78,6 +73,7 @@
   "related_tables": ["document_id-Table1"],
   "related_notes": ["document_id-Note_001"],
   "related_figures": ["document_id-Fig_001"],
+  "related_appendix": ["document_id-Fig_001"],
   "cross_references": ["참조하는 다른 문서/절"],
   "content_format": "markdown",
   "language": "eng",
