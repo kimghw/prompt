@@ -291,34 +291,6 @@ $$
 ### 8.3 Appendix 문서
 - 체크리스트는 구조화된 JSON 객체로
 - 폼 필드는 key-value 쌍으로 변환
-
-## 9. 버전 관리
-
-### 9.1 개정 이력 추적
-- 각 문서의 revision history 보존
-- 변경사항 하이라이트
-- 이전 버전과의 차이점 기록
-
-### 9.2 메타데이터
-```json
-{
-  "revision_history": [
-    {
-      "version": "Rev.3",
-      "date": "June 2016",
-      "changes": ["변경사항 요약"]
-    }
-  ],
-  "corrigenda": [
-    {
-      "number": "Corr.1",
-      "date": "May 2018",
-      "description": "수정사항"
-    }
-  ]
-}
-```
-
 ---
 
 **문서 버전**: 2.0  
