@@ -151,7 +151,7 @@
 {
   "note_id": "고유ID",
   "document_id": "문서ID",
-  "section_reference": "최하위절번호",
+  "section_reference": "최하위절번호",#문서 전체인 경우 'general'로 표기
   "type": "note/footnote",
   "markdown_content": "**Note**: This requirement applies to...",
   "keywords": ["키워드배열"]
