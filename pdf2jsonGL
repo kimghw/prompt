@@ -64,6 +64,7 @@
 - **document_id**: IACS 문서 고유 식별자 (예: "IACS_URs_ㅈㅈㅈZ29")
 - **section_id**: 최상위 절 번호 (예: "1", "2", "3")
 - **section_title**: 절 제목
+- **parent_id** : 상위 섹션, 최상위 이면 null
 - **total_token_count**: 해당 절의 총 토큰 수
 - **split_no**: 분리절, 하위절 아님
 - **content_format**: "markdown" (고정값)
