@@ -138,7 +138,7 @@
   "document_id": "문서ID",
   "section_reference": "최하위절번호",
   "title": "테이블 제목",
-  "summary": "테이블 요약",
+  "summary": "테이블 요약", 
   "markdown_content": "| Header 1 | Header 2 |\n|----------|----------|\n| Data 1   | Data 2   |",
   "row_count": 행수,
   "has_notes": true/false
@@ -166,12 +166,10 @@
   "title": "그림 제목",
   "type": "도면유형",
   "caption": "그림 설명",
-  "markdown_reference": "![그림 제목](#figure_id)",
+  "markdown_reference": "![Remote Survey Workflow](#Z29_Fig_001)",
   "page": 페이지번호,
   "image_format": "base64",
-  "image_data": "data:image/png;base64,iVBORw0KGgoAAAANS...",
-  "components": ["구성요소배열"],
-  "file_size": "파일크기(KB)"
+  "image_url": "https://assets.example.com/iacs/Z29/fig001.png"
 }
 ```
 
