@@ -26,7 +26,7 @@
 4. 하위 절 계층 구조 확인
 5. 테이블, 그림, note/footnote, appendix 위치 파악 및 sheet 번호
 6. 문서 버전 정보 및 개정 이력 확인
-
+7. 목차는 문서 구조에 참고로 사용(ParrentID 등에 활용)
 ### 2.2 추출 단위
 - **문서 타입**: UR, PR, UI, Appendix 등
 - **문서 번호**: 예) UR G1, UR G2, UR G3, UR Z15 등)
