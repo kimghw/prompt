@@ -1,0 +1,258 @@
+# IACS 문서 구조화 지침서 (버전 3.1, 2025-01-20)
+
+> **주요 변경사항**
+> - Annex/Appendix를 UR 내부 부록으로 명확히 정의
+> - 특이 형식 보고 절차 추가
+> - 프로그래밍 언어 특정 내용 제거
+> - 실무 중심 지침으로 재구성
+
+---
+
+## 1. 개요
+
+### 1.1 목적
+
+본 지침서는 **IACS** (International Association of Classification Societies) 기술 문서를 PDF 원본으로부터 **구조화된 JSON 데이터**로 변환할 때 필요한 표준 절차와 형식을 정의한다.
+
+### 1.2 적용 범위
+
+* **IACS 정식 발간물**: UR (Unified Requirements), PR (Procedural Requirements), UI (Unified Interpretations)
+* **문서 내 부록**: Annex, Appendix (UR 문서의 일부)
+* **특수 구조**: 양식(Form), 리포트 템플릿, Sheet 기반 문서
+
+### 1.3 기본 원칙
+
+1. **계층 구조 보존**: 원문의 절/항 체계 유지
+2. **토큰 기반 분할**: 750 토큰 초과 시 적절한 단위로 분할
+3. **테이블 타입 구분**: 용도와 형식에 따라 명확히 분류
+4. **특이 형식 보고**: 예상치 못한 형식은 우선 보고 후 처리
+5. **참조 무결성**: 모든 ID는 고유하며 상호 참조 가능
+
+---
+
+## 2. 특이 형식 보고 절차
+
+### 2.1 보고가 필요한 경우
+
+다음과 같은 경우 즉시 보고하고 처리 방침을 협의한다:
+
+| 상황 | 예시 | 보고 내용 |
+|------|------|-----------|
+| **예상치 못한 구조** | • 다단 중첩 테이블<br>• 그림 내 삽입된 테이블<br>• 페이지 걸친 복잡한 양식 | 구조 스크린샷, 페이지 번호, 예상 데이터 량 |
+| **새로운 테이블 타입** | • 체크리스트와 설명이 혼재<br>• 플로우차트 형태의 테이블 | 테이블 제목, 용도, 구성 요소 |
+| **비표준 참조 체계** | • 로마숫자와 아라비아 숫자 혼용<br>• 알파벳 서브섹션 (a, b, c) | 참조 패턴, 출현 빈도 |
+| **특수 콘텐츠** | • 수식 블록<br>• 코드 샘플<br>• 특수 기호/다이어그램 | 콘텐츠 타입, 처리 가능 여부 |
+
+### 2.2 보고 형식
+
+```
+[특이 형식 보고]
+문서: UR_Z10.1
+위치: Table VIII (36-38페이지)
+형식: 테이블 제목이지만 3페이지 분량의 구조화된 텍스트
+특징: 
+- 1. General, 2. Extent of survey 등 명확한 섹션 구조
+- 총 1500 토큰 이상의 텍스트
+- 실제 표 형태가 아닌 문서 형태
+제안: composite_content 타입으로 처리, 하위 섹션별 분리
+```
+
+---
+
+## 3. 문서 구조화 절차
+
+### 3.1 전체 프로세스
+
+| 단계 | 작업 내용 | 주의사항 |
+|------|-----------|----------|
+| **1. 사전 검토** | • 문서 전체 구조 파악<br>• 특이 형식 식별 및 보고<br>• 처리 방침 확정 | 새로운 형식 발견 시 즉시 중단하고 보고 |
+| **2. 구조 분석** | • 목차 기반 계층 추출<br>• 테이블/그림 위치 매핑<br>• Annex/Appendix 구분 | Annex는 UR의 일부로 처리 |
+| **3. 콘텐츠 분류** | • 섹션별 텍스트 추출<br>• 테이블 타입 판별<br>• 토큰 수 계산 | 복합 콘텐츠 테이블 주의 |
+| **4. 구조화** | • JSON 객체 생성<br>• ID 부여 및 링크 설정<br>• 분할 처리 (필요시) | ID 명명 규칙 엄격 준수 |
+| **5. 검증** | • 스키마 적합성<br>• 참조 무결성<br>• 토큰 수 재확인 | 모든 cross-reference 확인 |
+
+### 3.2 테이블 타입 판별 기준
+
+```
+판별 순서:
+1. 제목에 "Report", "Form", "Inspection" 포함 → form_table
+2. 페이지 이상의 텍스트 콘텐츠 → composite_content 검토
+3. Sheet 내 리포트 코드(TM1-T 등) → report_table
+4. 일반 데이터 → data_table
+```
+
+---
+
+## 4. JSON 스키마 정의
+
+### 4.1 주요 객체 타입
+
+#### 4.1.1 섹션 객체 (기본)
+```jsonc
+{
+  "document_type": "UR",  // UR, PR, UI만 (Annex는 parent_id로 구분)
+  "document_id": "UR_Z10.1",
+  "section_id": "UR_Z10.1-2.2",
+  "parent_id": null,  // Annex인 경우 상위 UR ID
+  "hierarchy_no": "2.2",
+  "section_title": "Scope",
+  "total_token_count": 620,
+  "content": "### 2.2 Scope\n\n..."
+}
+```
+
+#### 4.1.2 테이블 객체 (타입별)
+
+**Type 1: 데이터 테이블**
+```jsonc
+{
+  "table_id": "UR_Z10.1-Table_I",
+  "table_type": "data_table",
+  "title": "Minimum requirements to Close-up Surveys",
+  "content": "표준 마크다운 테이블"
+}
+```
+
+**Type 2: 양식 테이블**
+```jsonc
+{
+  "table_id": "UR_Z10.1-Table_V",
+  "table_type": "form_table",
+  "title": "OWNERS INSPECTION REPORT",
+  "form_structure": {
+    "header_fields": ["Ship Name", "Tank No"],
+    "inspection_grid": {
+      "rows": ["Deck", "Bottom"],
+      "columns": ["Cracks", "Corrosion"]
+    }
+  }
+}
+```
+
+**Type 3: 복합 콘텐츠 테이블**
+```jsonc
+{
+  "table_id": "UR_Z10.1-Table_VIII",
+  "table_type": "composite_content",
+  "title": "SURVEY REPORTING PRINCIPLES",
+  "total_token_count": 1500,
+  "processing_method": "split_by_sections",
+  "linked_sections": ["UR_Z10.1-Table_VIII-1", "UR_Z10.1-Table_VIII-2"]
+}
+```
+
+---
+
+## 5. 복합 콘텐츠 처리 지침
+
+### 5.1 처리 기준
+
+| 토큰 수 | 처리 방법 | 설명 |
+|---------|-----------|------|
+| < 200 | 단일 객체 유지 | table 객체의 content 필드에 전체 포함 |
+| 200-750 | 단일 링크 섹션 | 하나의 linked section 생성 |
+| > 750 | 다중 링크 섹션 | 논리적 구조(1., 2. 등)로 분할 |
+
+### 5.2 처리 예시
+
+```
+원본: Table VIII - SURVEY REPORTING PRINCIPLES (3페이지)
+처리:
+1. 메인 테이블 객체 생성 (메타데이터만)
+2. "1. General" → linked section 1 (650 토큰)
+3. "2. Extent of survey" → linked section 2 (850 토큰)
+4. 메인 객체에 linked_sections 배열로 연결
+```
+
+---
+
+## 6. Sheet 구조 처리 (Annex II 예시)
+
+### 6.1 Sheet 기반 문서 구조
+
+```
+Annex II 구조:
+- Sheet 1: Contents (목차)
+- Sheet 2: Instructions (지침)
+- Sheet 3: General Particulars (일반사항 양식)
+- Sheets 4-10: Reports (TM1-T ~ TM6-T)
+- Sheets 11-15: Guidance (안내 다이어그램)
+```
+
+### 6.2 처리 방법
+
+1. 각 Sheet를 독립 객체로 생성
+2. Sheet 타입 구분 (instruction, form, report, guidance)
+3. Report 양식은 코드(TM1-T 등) 포함
+4. 관련 Sheet 간 상호 참조 설정
+
+---
+
+## 7. ID 명명 규칙
+
+### 7.1 기본 규칙
+
+| 요소 | 형식 | 예시 |
+|------|------|------|
+| 문서 | `<타입>_<식별자>` | `UR_Z10.1` |
+| 섹션 | `<문서ID>-<계층번호>` | `UR_Z10.1-2.2.1` |
+| Annex | `<문서ID>-Annex_<번호/문자>` | `UR_Z10.1-Annex_II` |
+| 테이블 | `<문서ID>-Table_<번호>` | `UR_Z10.1-Table_VIII` |
+| 링크 섹션 | `<테이블ID>-<번호>` | `UR_Z10.1-Table_VIII-1` |
+| Sheet | `<Annex_ID>-Sheet_<번호>` | `UR_Z10.1-Annex_II-Sheet_4` |
+
+### 7.2 주의사항
+
+- 로마숫자는 그대로 사용 (Table_V, Annex_II)
+- 복합 콘텐츠의 하위 섹션은 순차 번호 부여
+- 모든 ID는 문서 내 유일해야 함
+
+---
+
+## 8. 검증 항목
+
+### 8.1 필수 검증 사항
+
+| 검증 항목 | 확인 내용 |
+|-----------|-----------|
+| **스키마 적합성** | 모든 필수 필드 존재 여부 |
+| **ID 유일성** | 중복 ID 없음 |
+| **참조 무결성** | 모든 linked_sections, related_tables 등이 실제 존재 |
+| **토큰 수 일치** | 분할된 섹션의 토큰 합 = 원본 토큰 수 |
+| **테이블 타입** | 내용과 table_type 일치 |
+
+### 8.2 검증 보고서 형식
+
+```
+[검증 결과]
+문서: UR_Z10.1
+총 섹션: 127개
+총 테이블: 15개 (data: 8, form: 3, composite: 4)
+특이사항:
+- Table VIII: composite_content로 처리, 2개 섹션 분할
+- Table IX: 다중 파트 구조 (i, ii, iii, iv, v)
+오류: 없음
+경고: Table V의 form_structure 일부 필드 누락 (선택사항)
+```
+
+---
+
+## 9. 자주 발생하는 이슈 및 해결
+
+| 이슈 | 해결 방법 |
+|------|-----------|
+| 테이블 제목이지만 긴 텍스트 | composite_content 타입 사용 |
+| 여러 파트로 구성된 테이블 | 각 파트별 독립 객체, parts 배열로 연결 |
+| Sheet와 Table 혼재 | Sheet는 컨테이너, Table은 콘텐츠로 구분 |
+| 페이지 걸친 양식 | 단일 form_table 객체로 통합 |
+
+---
+
+**문서 버전**: 3.1  
+**작성일**: 2025-01-20  
+**다음 검토일**: 2025-07-20
+
+**개정 이력**:
+- v3.1: 특이 형식 보고 절차 추가, Annex/Appendix 정의 명확화
+- v3.0: 테이블 타입 세분화, 복합 콘텐츠 처리 추가
+- v2.1: 초기 버전
