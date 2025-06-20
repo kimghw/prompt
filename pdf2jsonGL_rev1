@@ -193,7 +193,7 @@
 #### 3.2.1 필수 필드Add commentMore actions
 - **document_type**: 문서 유형 (UR/PR/UI)
 - **document_id**: 문서 고유 식별자
-- **section_id**: 객체에서 최 상위 id
+- **section_id**: 객체에서 최 상위 id, form_table(제목에 테이블이 들어간거)
 - **section_title**: 절 제목
 - **parent_id**: 상위 섹션 ID - appendix 의 parrent_id 는 Annex, Annex의 parrent_id는 null
 - **total_token_count**: 해당 절의 총 토큰 수
