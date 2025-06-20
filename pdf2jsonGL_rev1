@@ -135,9 +135,10 @@
     { "id": "3.2.1", "title": "Scope", "token_count": 120 },
     { "id": "3.2.2", "title": "Procedure", "token_count": 380 }
   ],
+  "last_subsection_id" : 3.2.2.3 # 가장 마지막 서브 섹션 번호
   "total_token_count": 820,
-  "related_tables": ["UR_G1-3.2_Table1"],
-  "related_notes": ["UR_G1-3.2_Note001"],
+  "related_tables": ["UR_G1-3.2_Table[no]"],
+  "related_notes": ["UR_G1-3.2_Note[no]"],
   "related_figures": ["UR_G1-3.2_Fig001"],
   "related_appendices": ["UR_G1_Appx1"],
   "cross_references": [
