@@ -43,6 +43,18 @@
 3. ** 분리 컨텐츠** : 데이터 테이블, 그림, appendix, 특이 형식의 별도 json 생성
 4. *# 스플릿 ** : 센션 분리 시 최하위 세션은 완전체로 구성, 최하위 세션은 분리하지 않
 
+테이블 판별 순서:
+
+1. 제목에 "Report", "Form", "Inspection" 포함 → form_table
+
+2. 제목이 table 인 경우 form_table
+
+3. TABLE + 고딕 숫자인 경우 form_table
+
+4. 일반 데이터 → data_table
+
+```
+
 ### 1.5 토큰 계산
 1. **토크나이저**: `tiktoken.get_encoding("cl100k_base")` 권장
 2. **경계**:
