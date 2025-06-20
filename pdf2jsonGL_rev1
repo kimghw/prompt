@@ -164,7 +164,6 @@
   "related_notes": ["section_id.Note[no]"],
   "related_figures": ["section_id,Fig001"],
   "related_appendices": ["UR_G1.Appx1"],
-  "linked_sections": [<테이블ID>-<번호>]
   "cross_references": [   
     { "document": "UR", "content_no": "UR_Z15-4.1" },
     { "document": "IGC", "content_no": "4.13.2" }
