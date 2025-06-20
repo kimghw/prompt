@@ -1,303 +1,234 @@
-# IACS 문서 구조화 지침서 (개선판)
+# IACS 문서 구조화 지침서 (버전 2.1, 2025‑06‑20)
+
+> **변경 요약**
+> ‑ JSON 스키마 필드 명칭·대소문자·쉼표 오류 수정
+> ‑ `split_total`, `column_count`, `figure_type` 등 새 필드 추가
+> ‑ Annex / Appendix 계층·ID 명명 통일
+> ‑ 토큰 계산·절 분할·검증 로직 구체화
+> ‑ Cross‑reference 객체화
+> ‑ 예시 코드·용어 일관성 개선
+
+---
 
 ## 1. 개요
 
 ### 1.1 목적
-본 지침서는 IACS(International Association of Classification Societies) 규정 및 협약 문서를 체계적으로 구조화하고 디지털화하기 위한 표준 절차를 제공합니다.
+
+본 지침서는 **IACS** (International Association of Classification Societies) 기술 문서를 PDF 원본으로부터 **Markdown + JSON** 구조 데이터로 변환할 때 필요한 표준 절차·포맷을 정의한다.
 
 ### 1.2 적용 범위
-- PDF 형식의 IACS 기술 문서 (UR, PR, UI 등)
-- 가스 탱커 관련 규정 문서
+
+* UR, PR, UI, Annex, Appendix 등 **IACS 정식 발간물**
+* 가스 탱커·LNG·해양플랜트 관련 기술 규정
 
 ### 1.3 주요 원칙
-- 절(Section) 단위 기반 추출
-- 750 토큰 기준 초과 시 500 토큰 미만으로 서브 절 분리
-- 텍스트와 비텍스트 요소의 분리 관리
-- 참조 무결성 유지
-- Markdown 형식으로 콘텐츠 표준화
-- 문서 간 참조 관계 명확화
+
+1. **Section 단위 추출** & 계층 보존
+2. **750 token** 초과 시 `400 – 500 token` 단위로 **스플릿**
+3. 텍스트 vs 비텍스트(테이블·그림·노트) **분리·연결**
+4. **참조 무결성**(ID unique + cross‑link) 유지
+5. 출력 콘텐츠는 **Markdown**
+6. 문서 간 교차 참조는 **객체형 배열**로 표현
+
+---
 
 ## 2. 문서 구조화 절차
 
-### 2.1 초기 분석
-1. 문서 타입 식별 (UR, PR, UI 등)
-2. 문서의 목차 구조/hierarchy 분석
-3. 최상위 절(1, 2, 3, 4...ANNEX) 식별
-4. 하위 절 계층 구조 확인
-5. 테이블, 그림, note/footnote, appendix 위치 파악 및 sheet 번호
-6. 문서 버전 정보 및 개정 이력 확인
-7. 목차는 문서 구조에 참고로 사용(ParrentID 등에 활용)
+| 단계               | 작업                                                                                                     | 세부 내용 |
+| ---------------- | ------------------------------------------------------------------------------------------------------ | ----- |
+| **2.1 초기 분석**    | ① 문서 타입·버전·개정이력 식별<br>② 목차 파싱 → 최상위 절 (1‑N, Annex) 추출<br>③ 테이블·그림·노트·Appendix 위치 매핑                    |       |
+| **2.2 콘텐츠 추출**   | ① 동일 hierarchy별 텍스트 수집<br>② LaTeX · Markdown 변환<br>③ `openai‑tiktoken` 등 BPE 토크나이저로 **실측 토큰 계산**       |       |
+| **2.3 절 분할**     | ① `total_token_count > 750` → 분할 대상<br>② 가장 가까운 **문단 경계**에서 커트<br>③ `split_no`(1…n) + `split_total` 기록 |       |
+| **2.4 보조 요소 처리** | 테이블 → JSON, 그림 → JSON(+이미지), 노트·Footnote → JSON, Appendix 폼 → JSON                                     |       |
+| **2.5 검증**       | JSON Schema lint, ID 중복, 참조 해상, Markdown link test, 토큰 재계산                                             |       |
+| **2.6 출력**       | ① `<document_id>.jsonl` (섹션) <br>② `<document_id>_tables.jsonl`, … <br>③ 검증 리포트(`.html` 또는 `.md`)      |       |
 
-### 2.2 추출 단위
-- **문서 타입**: UR, PR, UI, Appendix 등
-- **문서 번호**: 예) UR G1, UR G2, UR G3, UR Z15 등)
-- **적용 범위**:
-- **본문 상위 절**: 1. General, 2. Definitions, 3. Requirements, ANNEX 등
-- **계층**: 콘텐츠가 몇 번째 서브 섹션인지 기록
-- **메인텍스트 범위** : 동일 hierarchy 만 포함, 그 외에는 다른 메인텍스트 사용
-- **추가 분리**: 기본 단위 절이 750토큰 초과 시 500토큰 단위로 분리
-- **분리 시 ID**: split_no 작성
-- **상위 절 명시**: parent_id 작성
-- **포함 내용**: 해당 절의 모든 하위 절 내용
-
-※ Annex는 본문의 상위 절과 동급으로 처리
-
-### 2.3 문서 타입별 특별 고려사항
-
-#### 2.3.1 UR (Unified Requirements) 문서
-- Note 섹션 별도 추출
-- Revision history 메타데이터로 관리
-- End of Document 마커 처리
-
-## 3. JSON 구조 규격
-
-### 3.1 메인 텍스트 구조
-```json
-{
-  "document_type": "UR/PR/UI",
-  "document_id": "문서 번호 (예: UR G1, Z23, Z12.3)",
-  "document_title": "문서 제목",
-  "doc_version": "버전 정보",
-  "revision_date": "개정일",
-  "implementation_date": "시행일",
-  "applicable_to" : "적용 대상 선박/시스템 , 없으면 not defiend"
-  "parent_id": "상위 section_id (최상위면 null)",
-  "section_id": "절 번호",
-  "split_no": "분리 번호/총 수",
-  "hierarchy_no": "섹션 계층 번호",
-  "section_title": "절 제목",
-  "subsections": [ 
-    {
-      "id": "하위절 번호",
-      "title": "하위절 제목",
-      "token_count": "토큰 수"
-    }
-  ],
-  "total_token_count": "전체 토큰 수",
-  "related_tables": ["section_id-Table1"], (example: "G1.7.3_Table1")
-  "related_notes": ["section_id-Note_001"], (example: "G1.2.1_Note001") 
-  "related_figures": ["section_id-Fig_001"], (example: "G1.3.2_Fig001", "G1.3.4_Fig002")
-  "related_appendix": ["section_id-Appendix_001"],(example: "G1_Appendix1")
-  "cross_references": ["참조하는 다른 문서/절"],
-  "content_format": "markdown",
-  "language": "eng",
-  "content": "# 절 제목\n\n원문 그대로 마크다운 형식으로",
-}
-```
-
-### 3.2 필드 설명
-
-#### 3.2.1 필수 필드
-- **document_type**: 문서 유형 (UR/PR/UI/Appendix)
-- **document_id**: 문서 고유 식별자
-- **section_id**: 관련/소속 절 번호
-- **section_title**: 절 제목
-- **parent_id**: 상위 섹션 ID - appendix 의 parrent_id 는 Annex, Annex의 parrent_id는 null
-- **total_token_count**: 해당 절의 총 토큰 수
-- **content_format**: "markdown" (고정값)
-- **content**: Markdown 형식의 절 내용
-
-#### 3.2.2 선택 필드
-- **split_no**: 분리 번호 (분할된 경우)
-- **related_tables**: 관련 테이블 ID 배열
-- **related_notes**: 관련 노트/풋노트 ID 배열
-- **related_figures**: 관련 그림 ID 배열
-- **related_annexes**: 관련 부록 ID 배열
-- **cross_references**: 다른 문서 참조
-- **metadata**: 추가 메타데이터
-
-### 3.3 Markdown 변환 규칙
-
-#### 3.3.1 제목 계층
-```markdown
-# G1 Vessels with cargo containment system for liquefied gas
-## G1.1 General
-### G1.1.1 Sub-subsection
-```
-
-#### 3.3.2 목록 변환
-```markdown
-**번호 목록:**
-1. First item
-2. Second item
-   - Sub-item
-   - Another sub-item
-
-**문자 목록:**
-(a) Item one
-(b) Item two
-    (i) Nested item
-    (ii) Another nested item
-```
-
-#### 3.3.3 수식 표현
-```markdown
-인라인: $P_0 = 0.2 + 0.1AC\rho_0^{3/2}$ (N/mm²)
-블록:
-$$
-\sigma_c = \sqrt{\sigma_x^2 + \sigma_y^2 - \sigma_x\sigma_y + 3\tau_{xy}^2}
-$$
-```
-
-#### 3.3.4 참조 표시
-```markdown
-- 자세한 내용은 [Table 1](#G1_Table1) 참조
-- 관련 규정은 [G1.2.1](#G1-2-1) 참조
-- IGC Code 참조: [4.13.2 of the IGC Code]
-- Note[^1] 참조
-
-[^1]: This UR is to be uniformly implemented...
-```
-
-### 3.4 토큰 계산 기준
-- 영어 기준: 1 토큰 ≈ 4자
-- 특수문자 및 수식 포함 시 추가 고려
-- 분할 기준점: 750 토큰
-- 최적 분할 크기: 400-500 토큰
-
-## 4. 보조 요소 관리
-
-### 4.1 테이블 구조
-```json
-{
-  "table_id": "고유ID",
-  "document_id": "문서ID",
-  "title": "테이블 이름",
-  "section_reference": "최하위절번호",
-  "caption": "내용을 이해하는 데 필요한 맥락/설명이 가능하고 content가 700토큰을 넘지 않은 경우"
-  "summary": "테이블 요약",
-  "sheet":"시트 넘버", // 없으면 null
-  "content": "소스파일에서 추출한 내용",
-  "row_count": "행수",
-  "has_notes": true/false
-}
-```
-
-### 4.2 노트/풋노트 구조
-```json
-{
-  "note_id": "고유ID",
-  "document_id": "문서ID",
-  "title": "노트/풋노트 이름",
-  "section_reference": "관련된 최하위절번호", 
-  "type": "note/footnote/etc.",
-  "related_content": "관련 내용",
-  "keywords": ["키워드배열"]
-}
-```
-
-### 4.3 그림 구조
-```json
-{
-  "figure_id": "고유ID",
-  "document_id": "문서ID",
-  "section_reference": "최하위절번호",
-  "title": "그림 제목",
-  "type": "도면유형",
-  "caption": "내용을 이해하는 데 필요한 맥락"
-  "related_content": "관련 내용",
-  "page": "페이지번호",
-  "image_url": "https://assets.example.com/iacs/G1/fig001.png"
-}
-
-### 4.4  apppendix 구조
-```json
-{
-  "Appendix_id": "고유ID",
-  "document_id": "문서ID",
-  "Annex_id": "상위 절이름 ",
-  "title": "그림 제목",
-  "content": "관련 내용",
-  "page": "페이지번호",
-}
-```
-
-## 5. ID 명명 규칙
-
-### 5.1 문서 ID
-- UR 문서: "UR_[카테고리][번호]" (예: UR_G1, UR_G2)
-
-### 5.2 섹션 ID
-- 형식: "[문서ID]-[절번호]" (예: "UR_G1-1.2.1")
-- 분할 시: "[문서ID]-[절번호]-split[번호]"
-
-### 5.3 보조 요소 ID
-- 테이블: "[관련 하위절 번호]_Table[번호]" (example: "G1.7.3_Table1")
-- 노트: "[관련 하위절 번호]_Note_[3자리번호]" (example: "G1.2.1_Note1") 
-- 그림: "[관련 하위절 번호]_Fig_[3자리번호]" (example: "G1.3.2_Fig1", "G1.3.4_Fig2")
-- appendix:"[문서ID]_[관련 하위절 번호]_appendix_[번호]" (example: "G1_Appendix1")
-
-5.4 ID 규칙 원칙
-- 모든 보조 요소는 해당 요소가 참조되는 가장 구체적인 섹션 번호를 포함
-- 문서 전체에서 참조되는 경우 최상위 섹션 번호 사용 (예: "G1_Note001")
-- 특정 하위 섹션에서만 참조되는 경우 해당 하위 섹션 번호 사용 (예: "G1.3.2_Fig001")
-
-## 6. 처리 프로세스
-
-### 6.1 1단계: 문서 분석
-1. PDF 문서 로드 및 텍스트 추출
-2. 문서 타입 및 구조 식별
-3. 목차 구조 파싱
-4. 페이지별 요소 매핑
-
-### 6.2 2단계: 콘텐츠 추출
-1. 절 단위로 텍스트 추출
-2. Markdown 형식으로 변환
-3. 수식, 특수문자 처리
-4. 토큰 수 계산 및 분할 결정
-
-### 6.3 3단계: 보조 요소 처리
-1. 테이블 추출 및 구조화
-2. 노트/풋노트 식별 및 연결
-3. 그림 참조 정보 추출
-4. 상호 참조 관계 설정
-
-### 6.4 4단계: 검증
-1. 필수 필드 확인
-2. ID 중복 검사
-3. 참조 무결성 검증
-4. Markdown 문법 검증
-5. 토큰 수 재확인
-
-### 6.5 5단계: 출력
-1. JSON 파일 생성
-2. 인덱스 파일 생성
-3. 검증 리포트 생성
-
-## 7. 품질 관리
-
-### 7.1 검증 항목 체크리스트
-- [ ] 모든 절이 추출되었는가?
-- [ ] 문서 타입이 올바르게 식별되었는가?
-- [ ] Markdown 변환이 정확한가?
-- [ ] 토큰 수가 정확히 계산되었는가?
-- [ ] 모든 테이블/노트/그림이 식별되었는가?
-- [ ] 상호 참조가 올바른가?
-- [ ] ID 명명 규칙을 준수했는가?
-- [ ] 수식이 올바르게 변환되었는가?
-
-### 7.2 일반적인 오류 및 해결책
-- 절 번호 누락: OCR 오류 확인 및 수동 보정
-- 테이블 깨짐: 구조화된 데이터로 재구성
-- 수식 변환 오류: LaTeX 문법 검증
-- 참조 불일치: 전체 문서 대상 재검색
-
-## 8. 특수 케이스 처리
-
-### 8.1 다중 칼럼 레이아웃
-- 읽기 순서 명확히 식별
-- 칼럼별 분리 후 통합
-
-### 8.2 복잡한 테이블
-- 병합된 셀 처리
-- 중첩 테이블 분리
-- 필요시 여러 개의 단순 테이블로 분할
-
-### 8.3 Appendix 문서
-- 체크리스트는 구조화된 JSON 객체로
-- 폼 필드는 key-value 쌍으로 변환
 ---
 
-**문서 버전**: 2.0  
-**작성일**: 2024년 12월  
-**다음 검토일**: 2025년 6월
+## 3. JSON 스키마
+
+### 3.1 메인 섹션 오브젝트
+
+```jsonc
+{
+  "document_type": "UR | PR | UI | Annex | Appendix",
+  "document_id": "UR_G1",
+  "document_title": "Vessels with cargo containment system for liquefied gas",
+  "doc_version": "Rev.3",
+  "supersedes": "Rev.2",
+  "revision_date": "2023-07-01",
+  "implementation_date": "2024-01-01",
+  "applicable_to": "LNG carriers",
+  "parent_id": null,                // 최상위면 null
+  "section_id": "UR_G1-3.2",
+  "hierarchy_no": "3.2",
+  "split_no": 1,
+  "split_total": 2,
+  "section_title": "Pressure Testing Requirements",
+  "subsections": [
+    { "id": "3.2.1", "title": "Scope", "token_count": 120 },
+    { "id": "3.2.2", "title": "Procedure", "token_count": 380 }
+  ],
+  "total_token_count": 820,
+  "related_tables": ["UR_G1-3.2_Table1"],
+  "related_notes": ["UR_G1-3.2_Note001"],
+  "related_figures": ["UR_G1-3.2_Fig001"],
+  "related_appendices": ["UR_G1_Appx1"],
+  "cross_references": [
+    { "type": "UR", "target": "UR_Z15-4.1" },
+    { "type": "IGC", "target": "4.13.2" }
+  ],
+  "content_format": "markdown",
+  "language": "eng",
+  "content": "### 3.2 Pressure Testing Requirements\n\n1. All pressure‑containing parts..."
+}
+```
+
+> **변경점** 
+> • `applicable_to` 뒤 쉼표 추가 • `split_total` 필드 신설
+> • `related_appendices` 로 명칭 통일 • `cross_references` → 객체 배열화
+
+### 3.2 테이블 오브젝트
+
+```jsonc
+{
+  "table_id": "UR_G1-3.2_Table1",
+  "document_id": "UR_G1",
+  "title": "Minimum Pressure Test Values",
+  "section_reference": "UR_G1-3.2",
+  "caption": "Test values for independent tank systems",
+  "sheet": null,
+  "row_count": 8,
+  "column_count": 5,
+  "has_notes": true,
+  "content": "|Tank type|Max pressure (MPa)|...|"
+}
+```
+
+### 3.3 노트 / 풋노트 오브젝트
+
+```jsonc
+{
+  "note_id": "UR_G1-3.2_Note001",
+  "document_id": "UR_G1",
+  "title": "Implementation Note",
+  "section_reference": "UR_G1-3.2",
+  "type": "footnote",
+  "related_content": "This UR is to be uniformly implemented...",
+  "keywords": ["implementation", "uniform"]
+}
+```
+
+### 3.4 그림 오브젝트
+
+```jsonc
+{
+  "figure_id": "UR_G1-3.2_Fig001",
+  "document_id": "UR_G1",
+  "section_reference": "UR_G1-3.2",
+  "title": "Typical Tank Arrangement",
+  "figure_type": "schematic",
+  "caption": "Layout of Type C independent tanks",
+  "page": 17,
+  "image_url": "https://assets.example.com/iacs/UR_G1/Fig001.png"
+}
+```
+
+### 3.5 Appendix 오브젝트
+
+```jsonc
+{
+  "appendix_id": "UR_G1_Appx1",
+  "document_id": "UR_G1",
+  "annex_id": "Annex_A",
+  "title": "Inspection Checklist",
+  "page": 45,
+  "content": "- [ ] Hull structure...\n- [ ] Tank supports..."
+}
+```
+
+---
+
+## 4. ID 명명 규칙
+
+| 구분           | 규칙                     | 예시                                |
+| ------------ | ---------------------- | --------------------------------- |
+| **문서 ID**    | `UR_<카테고리><번호>`        | `UR_G1`                           |
+| **섹션 ID**    | `<문서ID>-<절번호>`         | `UR_G1-1.2.1`                     |
+| **스플릿 ID**   | 섹션 ID + `split_no`     | `UR_G1-1.2.1-split1` *(사용자 필요 시)* |
+| **테이블**      | `<섹션ID>_Table<n>`      | `UR_G1-3.2_Table1`                |
+| **노트**       | `<섹션ID>_Note<3digits>` | `UR_G1-3.2_Note001`               |
+| **그림**       | `<섹션ID>_Fig<3digits>`  | `UR_G1-3.2_Fig001`                |
+| **Appendix** | `<문서ID>_Appx<n>`       | `UR_G1_Appx1`                     |
+| **Annex**    | `<문서ID>_Annex_<ID>`    | `UR_G1_Annex_A`                   |
+
+> **원칙** : 가장 **구체적인 섹션 번호**를 포함하고, 문서 전체 범위에 걸치면 최상위 ID 사용.
+
+---
+
+## 5. 토큰 계산 & 분할 규칙
+
+1. **토크나이저**: `tiktoken.get_encoding("cl100k_base")` 권장
+2. **경계**:
+
+   * `total_token_count ≤ 750` → 분할 안 함
+   * `> 750` → `400 – 500` token 단위, **문단 경계**에서 컷
+3. **스플릿 번호**: `split_no`(1…n) + `split_total` 동시 기록
+4. **분할 후 검증**: 각 스플릿의 `total_token_count` 재계산 → 500 token ± 50 허용
+
+---
+
+## 6. 검증 체크리스트
+
+| 항목                     | 확인 방법                                       |
+| ---------------------- | ------------------------------------------- |
+| **필수 필드 존재**           | JSON Schema 검증 (`ajv`, `jsonschema` 등)      |
+| **ID 중복**              | `(document_id, section_id, split_no)` 복합 PK |
+| **Markdown 링크**        | `markdown‑link‑check` 자동 스캔                 |
+| **Cross‑reference 해상** | 대상 ID 검색 → 미존재 시 오류                         |
+| **LaTeX 렌더**           | KaTeX or MathJax test page 생성               |
+| **토큰 수**               | 토크나이저 재실행 결과 비교                             |
+
+---
+
+## 7. 특수 케이스
+
+### 7.1 다중 칼럼 PDF
+
+`LayoutParser` → 칼럼별 bbox 정렬 → 독립 추출 → 순서대로 병합.
+
+### 7.2 복잡한 테이블
+
+* 셀 병합 해제 후 **열 ≤ 10 · 행 ≤ 30** 단위로 분할
+* 초과 시 다단 테이블로 **Table ID 연번** 부여
+
+### 7.3 Annex / Appendix
+
+* **Annex**: 본문 상위 절과 동등, `parent_id = null`, 자체 JSON 생성
+* **Appendix**: Annex 하위 문서, `parent_id = <Annex_id>`, `appendix_id` 규칙 적용
+
+---
+
+## 8. 프로세스 자동화 샘플 (파이썬 CLI 요약)
+
+```bash
+# 1. PDF → raw JSON
+python extract_pdf.py UR_G1.pdf --out raw.json
+
+# 2. 구조화
+python transform.py raw.json --schema section --out UR_G1.jsonl
+
+# 3. 검증
+python validate.py UR_G1.jsonl --schema schema_section.json
+
+# 4. 리포트
+python report.py --doc UR_G1 --out QA_UR_G1.md
+```
+
+---
+
+**문서 버전**: 2.1
+**작성일**: 2025‑06‑20
+**다음 검토일**: 2026‑06‑20
+
+(© 2025 Your Company · All rights reserved)
