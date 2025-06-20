@@ -23,7 +23,8 @@
 ### 1.3 기본 원칙
 
 1. **계층 구조 보존**: 원문의 절/항 체계 유지
-2. **기본 단위** : 1, 2, 3.. ANNEX 이하 section  단위로 사용
+2. **기본 단위** : 1, 2, 3.. ANNEX, Table 이하 section  단위로 사용 
+2.1 ** 주위 ** : 제목이 Table 인 경우랑 데이터 테이블 이랑 구분 필요요
 3. **문서 ID** : A, B, C...A1, A2 를 문서 ID/document_id 
 4. **토큰 기반 분할**: 750 토큰 초과 시 적절한 단위로 분할
 5. **테이블 타입 구분**: 용도와 형식에 따라 명확히 분류
@@ -37,7 +38,7 @@
 2. ** 섹션 750 토큰 초과 시** : 하위섹션 분리
 3. ** 분리 컨텐츠** : 데이터 테이블, 그림, appendix, 특이 형식의 별도 json 생성
 
-### 1.5 토큰 계
+### 1.5 토큰 계산
 1. **토크나이저**: `tiktoken.get_encoding("cl100k_base")` 권장
 2. **경계**:
 
@@ -57,6 +58,7 @@
 - **분리 시 ID**: split_no 작성
 - **상위 절 명시**: parent_id 작성
 - **포함 내용**: 해당 절의 모든 하위 절 내용
+- **sheet 분리** : sheet 는 별도 객체 분리리
 
 ## 2. 특이 형식 보고 절차
 
@@ -123,21 +125,23 @@
   "document_title": "Vessels with cargo containment system for liquefied gas",
   "doc_version": "Rev.3",
   "revision_date": "2023-07-01",
+  "sheet" : 없으면 null, 있으면 기록
   "implementation_date": "2024-01-01",
   "applicable_to": "LNG carriers",           "적용 대상 선박/시스템 , 없으면 not defiend"
   "parent_id": null,                // 최상위면 null , 1, 2, 3,.. Annex etc.,
   "section_id": "UR_G1-3.2",
-  "hierarchy_no": "3",  # section_id : hierachy_no, 1 : 1, 1.1, 1.2: 2, 1.2.1, 1.2.2 : 3
+  "hierarchy_no": "3",  # section_id : hierachy_no, 1 : 1, 1.1, 1.2: 2, 1.2.1, 1.2.2 : 3, Table I, ANNEX 2
   "split_no": 1,
   "split_total": 2,
   "section_title": "Pressure Testing Requirements",
   "subsections": [
     { "id": "3.2.1", "title": "Scope", "token_count": 120 },
     { "id": "3.2.2", "title": "Procedure", "token_count": 380 }
+    { "Table I": "3.2.2", "title": "Procedure", "token_count": 380 }
   ],
   "last_subsection_id" : 3.2.2.3 # 가장 마지막 서브 섹션 번호
   "total_token_count": 820,
-  "related_tables": ["UR_G1-3.2_Table[no]"],
+  "related_tables": ["UR_G1-3.2_Table[no]"], # 데이터 테이블
   "related_notes": ["UR_G1-3.2_Note[no]"],
   "related_figures": ["UR_G1-3.2_Fig001"],
   "related_appendices": ["UR_G1_Appx1"],
@@ -165,36 +169,6 @@
   "content": "표준 마크다운 테이블"
 }
 ```
-
-**Type 2: 양식 테이블**
-```jsonc
-{
-  "table_id": "document_id_section(소속된)_Table_I",
-  "table_type": "form_table",
-  "document_id": "UR_G1",
-  "title": "OWNERS INSPECTION REPORT",
-  "section_reference": "UR_G1-3.2",
-  "form_structure": {
-    "header_fields": ["Ship Name", "Tank No"],
-    "inspection_grid": {
-      "rows": ["Deck", "Bottom"],
-      "columns": ["Cracks", "Corrosion"]
-    }
-  }
-}
-```
-
-**Type 3: 복합 콘텐츠 테이블**
-```jsonc
-{
-  "table_id": "UR_Z10.1-Table_VIII",
-  "table_type": "composite_content",
-  "document_id": "UR_G1",
-  "title": "SURVEY REPORTING PRINCIPLES",
-  "total_token_count": 1500,
-  "processing_method": "split_by_sections",
-  "linked_sections": ["UR_Z10.1-Table_VIII-1", "UR_Z10.1-Table_VIII-2"]
-}
 ```
 ### 4.2 필드 설명
 #### 3.2.1 필수 필드Add commentMore actions
@@ -213,6 +187,7 @@
 - **related_notes**: 관련 노트/풋노트 ID 배열
 - **related_figures**: 관련 그림 ID 배열
 - **related_annexes**: 관련 부록 ID 배열
+- **related_sessions**: 관련 부록 ID 배열
 - **cross_references**: 다른 문서 참조
 
 ## 5. 복합 콘텐츠 처리 지침
