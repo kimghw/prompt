@@ -144,9 +144,9 @@
   ],
   "last_subsection_id" : 3.2.2.3 # 가장 마지막 서브 섹션 번호
   "total_token_count": 820,
-  "related_tables": ["UR_G1-3.2_Table[no]"], # 데이터 테이블
-  "related_notes": ["UR_G1-3.2_Note[no]"],
-  "related_figures": ["UR_G1-3.2_Fig001"],
+  "related_tables": ["section_id_Table[no]"], # 데이터 테이블
+  "related_notes": ["section_id_Note[no]"],
+  "related_figures": ["section_id__Fig001"],
   "related_appendices": ["UR_G1_Appx1"],
   "cross_references": [
     { "document": "UR", "content_no": "UR_Z15-4.1" },
