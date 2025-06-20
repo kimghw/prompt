@@ -156,7 +156,7 @@
 **Type 1: 데이터 테이블**
 ```jsonc
 {
-  "table_id": "UR_Z10.1-Table_I",
+  "table_id": "document_id_section(소속된)_Table_I",
   "table_type": "data_table",
   "document_id": "UR_G1",
   "title": "Minimum Pressure Test Values",
@@ -169,7 +169,7 @@
 **Type 2: 양식 테이블**
 ```jsonc
 {
-  "table_id": "UR_Z10.1-Table_V",
+  "table_id": "document_id_section(소속된)_Table_I",
   "table_type": "form_table",
   "document_id": "UR_G1",
   "title": "OWNERS INSPECTION REPORT",
