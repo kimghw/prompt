@@ -17,18 +17,46 @@
 ### 1.2 적용 범위
 
 * **IACS 정식 발간물**: UR (Unified Requirements), PR (Procedural Requirements), UI (Unified Interpretations)
-* **문서 내 부록**: Annex, Appendix (UR 문서의 일부)
+* **문서 내 부록**: Annex
 * **특수 구조**: 양식(Form), 리포트 템플릿, Sheet 기반 문서
 
 ### 1.3 기본 원칙
 
 1. **계층 구조 보존**: 원문의 절/항 체계 유지
-2. **토큰 기반 분할**: 750 토큰 초과 시 적절한 단위로 분할
-3. **테이블 타입 구분**: 용도와 형식에 따라 명확히 분류
-4. **특이 형식 보고**: 예상치 못한 형식은 우선 보고 후 처리
-5. **참조 무결성**: 모든 ID는 고유하며 상호 참조 가능
+2. **기본 단위** : 1, 2, 3.. ANNEX 이하 section  단위로 사용
+3. **문서 ID** : A, B, C...A1, A2 를 문서 ID/document_id 
+4. **토큰 기반 분할**: 750 토큰 초과 시 적절한 단위로 분할
+5. **테이블 타입 구분**: 용도와 형식에 따라 명확히 분류
+6. **특이 형식 보고**: 예상치 못한 형식은 우선 보고 후 처리
+7. **참조 무결성**: 모든 ID는 고유하며 상호 참조 가능
+8. **출력 양식**: Markdown
+9. **문서 간 교차 참조**: 객체형 배열로 표현
 
----
+### 1.4 분할 원칙
+1. ** 분할 단위** : 섹션단위로 분할, 하위 섹션 포함
+2. ** 섹션 750 토큰 초과 시** : 하위섹션 분리
+3. ** 분리 컨텐츠** : 데이터 테이블, 그림, appendix, 특이 형식의 별도 json 생성
+
+### 1.5 토큰 계
+1. **토크나이저**: `tiktoken.get_encoding("cl100k_base")` 권장
+2. **경계**:
+
+   * `total_token_count ≤ 750` → 분할 안 함
+   * `> 750` → `400 – 500` token 단위, **문단 경계**에서 컷
+3. **스플릿 번호**: `split_no`(1…n) + `split_total` 동시 기록
+4. **분할 후 검증**: 각 스플릿의 `total_token_count` 재계산 → 500 token ± 50 허용
+
+### 1.6 추출단위
+- **문서 타입**: UR, PR, UI
+- **문서 번호**: 예) UR G1, UR G2, UR G3, UR Z15 등)
+- **적용 범위**:
+- **본문 상위 절**: 1. General, 2. Definitions, 3. Requirements, ANNEX 등
+- **계층**: 콘텐츠가 몇 번째 서브 섹션인지 기록
+- **메인텍스트 범위** : 동일 hierarchy 만 포함, 그 외에는 다른 메인텍스트 사용
+- **추가 분리**: 기본 단위 절이 750토큰 초과 시 500토큰 단위로 분리, 계층 분리 시 같은 하위 섹션만 객체 구성
+- **분리 시 ID**: split_no 작성
+- **상위 절 명시**: parent_id 작성
+- **포함 내용**: 해당 절의 모든 하위 절 내용
 
 ## 2. 특이 형식 보고 절차
 
@@ -66,7 +94,7 @@
 | 단계 | 작업 내용 | 주의사항 |
 |------|-----------|----------|
 | **1. 사전 검토** | • 문서 전체 구조 파악<br>• 특이 형식 식별 및 보고<br>• 처리 방침 확정 | 새로운 형식 발견 시 즉시 중단하고 보고 |
-| **2. 구조 분석** | • 목차 기반 계층 추출<br>• 테이블/그림 위치 매핑<br>• Annex/Appendix 구분 | Annex는 UR의 일부로 처리 |
+| **2. 구조 분석** | • 목차 기반 계층 추출<br>• 테이블/그림 위치 매핑<br>• Annex/Appendix 구분 | Annex는 UR의 센션으로 간주 |
 | **3. 콘텐츠 분류** | • 섹션별 텍스트 추출<br>• 테이블 타입 판별<br>• 토큰 수 계산 | 복합 콘텐츠 테이블 주의 |
 | **4. 구조화** | • JSON 객체 생성<br>• ID 부여 및 링크 설정<br>• 분할 처리 (필요시) | ID 명명 규칙 엄격 준수 |
 | **5. 검증** | • 스키마 적합성<br>• 참조 무결성<br>• 토큰 수 재확인 | 모든 cross-reference 확인 |
@@ -90,14 +118,35 @@
 #### 4.1.1 섹션 객체 (기본)
 ```jsonc
 {
-  "document_type": "UR",  // UR, PR, UI만 (Annex는 parent_id로 구분)
-  "document_id": "UR_Z10.1",
-  "section_id": "UR_Z10.1-2.2",
-  "parent_id": null,  // Annex인 경우 상위 UR ID
-  "hierarchy_no": "2.2",
-  "section_title": "Scope",
-  "total_token_count": 620,
-  "content": "### 2.2 Scope\n\n..."
+  "document_type": "UR | PR | UI |
+  "document_id": "UR_G1", # UR_G1.1
+  "document_title": "Vessels with cargo containment system for liquefied gas",
+  "doc_version": "Rev.3",
+  "revision_date": "2023-07-01",
+  "implementation_date": "2024-01-01",
+  "applicable_to": "LNG carriers",           "적용 대상 선박/시스템 , 없으면 not defiend"
+  "parent_id": null,                // 최상위면 null , 1, 2, 3,.. Annex etc.,
+  "section_id": "UR_G1-3.2",
+  "hierarchy_no": "3",  # section_id : hierachy_no, 1 : 1, 1.1, 1.2: 2, 1.2.1, 1.2.2 : 3
+  "split_no": 1,
+  "split_total": 2,
+  "section_title": "Pressure Testing Requirements",
+  "subsections": [
+    { "id": "3.2.1", "title": "Scope", "token_count": 120 },
+    { "id": "3.2.2", "title": "Procedure", "token_count": 380 }
+  ],
+  "total_token_count": 820,
+  "related_tables": ["UR_G1-3.2_Table1"],
+  "related_notes": ["UR_G1-3.2_Note001"],
+  "related_figures": ["UR_G1-3.2_Fig001"],
+  "related_appendices": ["UR_G1_Appx1"],
+  "cross_references": [
+    { "document": "UR", "content_no": "UR_Z15-4.1" },
+    { "document": "IGC", "content_no": "4.13.2" }
+  ],
+  "content_format": "markdown",
+  "language": "eng",
+  "content": "### 3.2 Pressure Testing Requirements\n\n1. All pressure‑containing parts..."  #markdown
 }
 ```
 
@@ -108,7 +157,10 @@
 {
   "table_id": "UR_Z10.1-Table_I",
   "table_type": "data_table",
-  "title": "Minimum requirements to Close-up Surveys",
+  "document_id": "UR_G1",
+  "title": "Minimum Pressure Test Values",
+  "section_reference": "UR_G1-3.2",
+  "caption": "Minimum requirements to Close-up Surveys",
   "content": "표준 마크다운 테이블"
 }
 ```
@@ -118,7 +170,9 @@
 {
   "table_id": "UR_Z10.1-Table_V",
   "table_type": "form_table",
+  "document_id": "UR_G1",
   "title": "OWNERS INSPECTION REPORT",
+  "section_reference": "UR_G1-3.2",
   "form_structure": {
     "header_fields": ["Ship Name", "Tank No"],
     "inspection_grid": {
@@ -134,14 +188,31 @@
 {
   "table_id": "UR_Z10.1-Table_VIII",
   "table_type": "composite_content",
+  "document_id": "UR_G1",
   "title": "SURVEY REPORTING PRINCIPLES",
   "total_token_count": 1500,
   "processing_method": "split_by_sections",
   "linked_sections": ["UR_Z10.1-Table_VIII-1", "UR_Z10.1-Table_VIII-2"]
 }
 ```
+### 4.2 필드 설명
+#### 3.2.1 필수 필드Add commentMore actions
+- **document_type**: 문서 유형 (UR/PR/UI)
+- **document_id**: 문서 고유 식별자
+- **section_id**: 관련/소속 절 번호
+- **section_title**: 절 제목
+- **parent_id**: 상위 섹션 ID - appendix 의 parrent_id 는 Annex, Annex의 parrent_id는 null
+- **total_token_count**: 해당 절의 총 토큰 수
+- **content_format**: "markdown" (고정값)
+- **content**: Markdown 형식의 절 내용
 
----
+#### 3.2.2 선택 필드
+- **split_no**: 분리 번호 (분할된 경우)
+- **related_tables**: 관련 테이블 ID 배열
+- **related_notes**: 관련 노트/풋노트 ID 배열
+- **related_figures**: 관련 그림 ID 배열
+- **related_annexes**: 관련 부록 ID 배열
+- **cross_references**: 다른 문서 참조
 
 ## 5. 복합 콘텐츠 처리 지침
 
@@ -192,67 +263,36 @@ Annex II 구조:
 
 ### 7.1 기본 규칙
 
-| 요소 | 형식 | 예시 |
-|------|------|------|
-| 문서 | `<타입>_<식별자>` | `UR_Z10.1` |
-| 섹션 | `<문서ID>-<계층번호>` | `UR_Z10.1-2.2.1` |
-| Annex | `<문서ID>-Annex_<번호/문자>` | `UR_Z10.1-Annex_II` |
-| 테이블 | `<문서ID>-Table_<번호>` | `UR_Z10.1-Table_VIII` |
+| 구분           | 규칙                     | 예시                                |
+| ------------ | ---------------------- | --------------------------------- |
+| **문서 ID**    | `UR_<카테고리><번호>`        | `UR_G1`                           |
+| **섹션 ID**    | `<문서ID>-<절번호>`         | `UR_G1-1.2.1`                     |
+| **스플릿 ID**   | 섹션 ID + `split_no`     | `UR_G1-1.2.1-split1` *(사용자 필요 시)* |
+| **테이블**      | `<섹션ID>_Table<n>`      | `UR_G1-3.2_Table1`                |
+| **노트**       | `<섹션ID>_Note<3digits>` | `UR_G1-3.2_Note001`               |
+| **그림**       | `<섹션ID>_Fig<3digits>`  | `UR_G1-3.2_Fig001`                |
+| **Appendix** | `<문서ID>_Appx<n>+ section_id`       | `UR_G1_Appx1`                     |
+| **Annex**    | `<문서ID>_Annex_<ID>`    | `UR_G1_Annex_A`                   |
 | 링크 섹션 | `<테이블ID>-<번호>` | `UR_Z10.1-Table_VIII-1` |
 | Sheet | `<Annex_ID>-Sheet_<번호>` | `UR_Z10.1-Annex_II-Sheet_4` |
 
-### 7.2 주의사항
+> **원칙** : 가장 **구체적인 섹션 번호**를 포함하고, 문서 전체 범위에 걸치면 최상위 ID 사용.
 
-- 로마숫자는 그대로 사용 (Table_V, Annex_II)
-- 복합 콘텐츠의 하위 섹션은 순차 번호 부여
-- 모든 ID는 문서 내 유일해야 함
+## 8. 특수 케이스
 
----
+### 8.1 다중 칼럼 PDF
 
-## 8. 검증 항목
+`LayoutParser` → 칼럼별 bbox 정렬 → 독립 추출 → 순서대로 병합.
 
-### 8.1 필수 검증 사항
+### 8.2 복잡한 테이블
 
-| 검증 항목 | 확인 내용 |
-|-----------|-----------|
-| **스키마 적합성** | 모든 필수 필드 존재 여부 |
-| **ID 유일성** | 중복 ID 없음 |
-| **참조 무결성** | 모든 linked_sections, related_tables 등이 실제 존재 |
-| **토큰 수 일치** | 분할된 섹션의 토큰 합 = 원본 토큰 수 |
-| **테이블 타입** | 내용과 table_type 일치 |
+* 셀 병합 해제 후 **열 ≤ 10 · 행 ≤ 30** 단위로 분할
+* 초과 시 다단 테이블로 **Table ID 연번** 부여
 
-### 8.2 검증 보고서 형식
+### 8.3 Annex / Appendix
 
-```
-[검증 결과]
-문서: UR_Z10.1
-총 섹션: 127개
-총 테이블: 15개 (data: 8, form: 3, composite: 4)
-특이사항:
-- Table VIII: composite_content로 처리, 2개 섹션 분할
-- Table IX: 다중 파트 구조 (i, ii, iii, iv, v)
-오류: 없음
-경고: Table V의 form_structure 일부 필드 누락 (선택사항)
-```
+* **Annex**: 본문 상위 절과 동등, `parent_id = null`, 자체 JSON 생성
+* **Appendix**: Annex 하위 문서, `parent_id = <Annex_id>`, `appendix_id` 규칙 적용
 
 ---
 
-## 9. 자주 발생하는 이슈 및 해결
-
-| 이슈 | 해결 방법 |
-|------|-----------|
-| 테이블 제목이지만 긴 텍스트 | composite_content 타입 사용 |
-| 여러 파트로 구성된 테이블 | 각 파트별 독립 객체, parts 배열로 연결 |
-| Sheet와 Table 혼재 | Sheet는 컨테이너, Table은 콘텐츠로 구분 |
-| 페이지 걸친 양식 | 단일 form_table 객체로 통합 |
-
----
-
-**문서 버전**: 3.1  
-**작성일**: 2025-01-20  
-**다음 검토일**: 2025-07-20
-
-**개정 이력**:
-- v3.1: 특이 형식 보고 절차 추가, Annex/Appendix 정의 명확화
-- v3.0: 테이블 타입 세분화, 복합 콘텐츠 처리 추가
-- v2.1: 초기 버전
