@@ -132,7 +132,7 @@
   "implementation_date": "2024-01-01",
   "applicable_to": "LNG carriers",           "적용 대상 선박/시스템 , 없으면 not defiend"
   "parent_id": null,                // 최상위면 null , 1, 2, 3,.. Annex etc.,
-  "section_id": "UR_G1-3.2",
+  "section_id": "UR_G1-3.2",   # 객체 내용 중 가장 최상위 id
   "hierarchy_no": "3",  # section_id : hierachy_no, 1 : 1, 1.1, 1.2: 2, 1.2.1, 1.2.2 : 3, Table I, ANNEX 2
   "split_no": 1,
   "split_total": 2,
@@ -177,7 +177,7 @@
 #### 3.2.1 필수 필드Add commentMore actions
 - **document_type**: 문서 유형 (UR/PR/UI)
 - **document_id**: 문서 고유 식별자
-- **section_id**: 관련/소속 절 번호
+- **section_id**: 객체에서 최 상위 id
 - **section_title**: 절 제목
 - **parent_id**: 상위 섹션 ID - appendix 의 parrent_id 는 Annex, Annex의 parrent_id는 null
 - **total_token_count**: 해당 절의 총 토큰 수
