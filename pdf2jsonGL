@@ -72,10 +72,10 @@
     }
   ],
   "total_token_count": "전체 토큰 수",
-  "related_tables": ["section_id-Table1"],
-  "related_notes": ["section_id-Note_001"],
-  "related_figures": ["section_id-Fig_001"],
-  "related_appendix": ["section_id-Appendix_001"],
+  "related_tables": ["section_id-Table1"], (example: "G1.7.3_Table1")
+  "related_notes": ["section_id-Note_001"], (example: "G1.2.1_Note001") 
+  "related_figures": ["section_id-Fig_001"], (example: "G1.3.2_Fig001", "G1.3.4_Fig002")
+  "related_appendix": ["section_id-Appendix_001"],(example: "G1_Appendix1")
   "cross_references": ["참조하는 다른 문서/절"],
   "content_format": "markdown",
   "language": "eng",
