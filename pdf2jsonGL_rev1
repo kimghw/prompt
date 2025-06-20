@@ -144,14 +144,15 @@
   ],
   "last_subsection_id" : 3.2.2.3 # 가장 마지막 서브 섹션 번호
   "total_token_count": 820,
-  "related_tables": ["section_id_Table[no]"], # 데이터 테이블
+  "related_tables": ["section_id_Table[no]"], # 데이터 테이블만 적용, 소제목 테이블 아님
   "related_notes": ["section_id_Note[no]"],
   "related_figures": ["section_id__Fig001"],
   "related_appendices": ["UR_G1_Appx1"],
-  "cross_references": [
+  "related_sections": 최상위 섹션 내에서 UR_ZA, UR_AB.....ANNEX.. TABLE
+  "cross_references": [   
     { "document": "UR", "content_no": "UR_Z15-4.1" },
     { "document": "IGC", "content_no": "4.13.2" }
-  ],
+  ], 
   "content_format": "markdown",
   "language": "eng",
   "content": "### 3.2 Pressure Testing Requirements\n\n1. All pressure‑containing parts..."  #markdown
