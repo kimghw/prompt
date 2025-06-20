@@ -27,12 +27,14 @@
 5. 테이블, 그림, note/footnote, appendix 위치 파악 및 sheet 번호
 6. 문서 버전 정보 및 개정 이력 확인
 7. 목차는 문서 구조에 참고로 사용(ParrentID 등에 활용)
+
 ### 2.2 추출 단위
 - **문서 타입**: UR, PR, UI, Appendix 등
 - **문서 번호**: 예) UR G1, UR G2, UR G3, UR Z15 등)
 - **적용 범위**:
 - **본문 상위 절**: 1. General, 2. Definitions, 3. Requirements, ANNEX 등
 - **계층**: 콘텐츠가 몇 번째 서브 섹션인지 기록
+- **메인텍스트 범위** : 동일 hierarchy 만 포함, 그 외에는 다른 메인텍스트 사용
 - **추가 분리**: 기본 단위 절이 750토큰 초과 시 500토큰 단위로 분리
 - **분리 시 ID**: split_no 작성
 - **상위 절 명시**: parent_id 작성
@@ -64,7 +66,7 @@
   "split_no": "분리 번호/총 수",
   "hierarchy_no": "섹션 계층 번호",
   "section_title": "절 제목",
-  "subsections": [
+  "subsections": [ 
     {
       "id": "하위절 번호",
       "title": "하위절 제목",
