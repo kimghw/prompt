@@ -149,9 +149,10 @@
   "last_subsection_id" : 3.2.2.3 # 가장 마지막 서브 섹션 번호
   "total_token_count": 820,
   "related_tables": ["section_id_Table[no]"], # 데이터 테이블만 적용, 소제목 테이블 아님
-  "related_notes": ["section_id_Note[no]"],
-  "related_figures": ["section_id__Fig001"],
-  "related_appendices": ["UR_G1_Appx1"],
+  "related_notes": ["section_id.Note[no]"],
+  "related_figures": ["section_id,Fig001"],
+  "related_appendices": ["UR_G1.Appx1"],
+  "linked_sections": [<테이블ID>-<번호>]
   "cross_references": [   
     { "document": "UR", "content_no": "UR_Z15-4.1" },
     { "document": "IGC", "content_no": "4.13.2" }
@@ -251,10 +252,10 @@ Annex II 구조:
 | **문서 ID**    | `UR_<카테고리><번호>`        | `UR_G1`                           |
 | **섹션 ID**    | `<문서ID>-<절번호>`         | `UR_G1-1.2.1`                     |
 | **스플릿 ID**   | 섹션 ID + `split_no`     | `UR_G1-1.2.1-split1` *(사용자 필요 시)* |
-| **테이블**      | `<섹션ID>_Table<n>`      | `UR_G1-3.2_Table1`                |
-| **노트**       | `<섹션ID>_Note<n>` | `UR_G1-3.2_Note1`               |
-| **그림**       | `<섹션ID>_Fig<n>`  | `UR_G1-3.2_Fig1`                |
-| **Appendix** | `<문서ID>_Appx<n>+ section_id`       | `UR_G1_Appx1`                     |
+| **테이블**      | `<섹션ID>.Table<n>`      | `UR_G1-3.2_Table1`                |
+| **노트**       | `<섹션ID>.Note<n>` | `UR_G1-3.2_Note1`               |
+| **그림**       | `<섹션ID>.Fig<n>`  | `UR_G1-3.2_Fig1`                |
+| **Appendix** | `<문서ID>_Appx<n>+section_id`       | `UR_G1_Appx1`                     |
 | **Annex**    | `<문서ID>_Annex_<ID>`    | `UR_G1_Annex_A`                   |
 | 링크 섹션 | `<테이블ID>-<번호>` | `UR_Z10.1-Table_VIII-1` |
 | Sheet | `<Annex_ID>-Sheet_<번호>` | `UR_Z10.1-Annex_II-Sheet_4` |
