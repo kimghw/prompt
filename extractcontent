@@ -86,13 +86,13 @@
 
 #### 6-2. Annex 예시
 
-| document_id | chapter_id | segment | section | 포함되는 하위 섹션 | page(s) | 예상 토큰* |
+| document_id | chapter_id | segment | section | 포함되는 하위 섹션 | clause | 페이지 | 예상 토큰* |
 |------------|------------|---------|---------|------------------|---------|-----------|
-| UR | Z10.4 | **1** | **ANNEX II (CSR) - Sheet 1** | Contents (목차) | 91 | ≈350 |
-| UR | Z10.4 | **2** | **ANNEX II (CSR) - Sheet 2** | Instructions | 92 | ≈280 |
-| UR | Z10.4 | **3** | **ANNEX II (CSR) - Sheet 3** | General Particulars | 93 | ≈320 |
-| UR | Z10.4 | **4** | **ANNEX II (CSR) - REPORTS** | Sheet 4 (TM1-DHT(CSR)), Notes | 94-95 | ≈650 |
-| UR | Z10.4 | **5** | **ANNEX II (CSR) - REPORTS** | Sheet 5 (TM2-DHT(CSR)(i)), Notes | 96-97 | ≈600 |
+| UR | Z10.4 | **1** | **ANNEX II** |  (CSR) - Sheet 1 | Contents (목차) | 91 | ≈350 |
+| UR | Z10.4 | **2** | **ANNEX II** | (CSR) - Sheet 2** | Instructions | 92 | ≈280 |
+| UR | Z10.4 | **3** | **ANNEX II** | (CSR) - Sheet 3** | General Particulars | 93 | ≈320 |
+| UR | Z10.4 | **4** | **ANNEX II** | (CSR) - REPORTS** | Sheet 4 (TM1-DHT(CSR)), Notes | 94-95 | ≈650 |
+| UR | Z10.4 | **5** | **ANNEX II **| (CSR) - REPORTS** | Sheet 5 (TM2-DHT(CSR)(i)), Notes | 96-97 | ≈600 |
 
 ### 7. 지침과 다른 경우
 - 지침과 다른 경우 새로운 예시 제시시
