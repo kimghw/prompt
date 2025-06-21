@@ -1,0 +1,21 @@
+# json 객체 생성 시 체크리스트
+JSON 작성 전 체크리스트
+1. 테이블 분류 확인
+
+ Table + 로마숫자 (I, II, III...) → form_table → related_tables에 포함 X
+ 일반 데이터 테이블 → data_table → related_tables에 포함 O
+ Sheet 내 Report 코드 (TM1-DHT 등) → report_table → related_tables에 포함 X
+
+2. 필수 필드 확인
+
+ document_id: "UR_Z10.4" 형식
+ section_id: 객체 내 최상위 ID (split 정보 미포함)
+ hierarchy_no: 정확한 계층 번호
+ parent_id: 상위 섹션 ID 또는 null
+ related_tables: 데이터 테이블만 포함
+
+3. 토큰 수 확인
+
+ total_token_count: content 필드의 실제 토큰 수
+ subsections의 token_count: 각 서브섹션 예상 크기
+ 750 토큰 초과 시 분할 필요
