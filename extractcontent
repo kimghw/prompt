@@ -11,7 +11,7 @@
 | ---------------- | --------- | ----------------------------------- |
 | `document_id`    | 문서 유형 구분자 | `UR`, `PR`, `ISO`, `지침` …           |
 | `document_title` | 문서 전체 제목  | *Unified Requirements Z10.4 Rev.18* |
-| `chapter_id`     | 장(章) 구분자  | `Z10`, `Z10.1`, `A11` …  'Z10.4, 'Z10.2  |
+| `chapter_id`     | 장(章) 구분자  | `Z10`, `Z10.1`, `A11` …  'Z10.4, 'Z10.2 , 기본장만 사용용 |
 | `chapter_title`  | 장 제목      | *Thickness Measurements*            |
 
 ---
@@ -23,7 +23,7 @@
 
 | 계층               | 허용 패턴 (정규식 예시)                                          | 비고                                          |
 | ---------------- | ------------------------------------------------------- | ------------------------------------------- |
-| **section**      | `^                       | `1`, `2`, `3` … / 
+| **section**      | `^                                                         | `1`, `2`, `3` … ANNEX, TABLE/ 
 | **sub\_section** | `^\d+\.\d+`  또는  `s  heet\s*\d+`                           | `1.1`, `2.3` … /  |``Sheet 1` …  /'APPENDIX2|
 | **clause**       | `^\d+\.\d+\.\d+`                                        | `1.1.1`, `2.3.4` …                          |
 | **item**         | `^\d+\.\d+\.\d+\.\d+`  또는  `^\([a-z]&#124;[ivxlcdm]+\)` | `1.1.1.1`, `(a)`, `(i)` …                   |
@@ -64,9 +64,9 @@
 | 필드명           | 설명                                   |
 | ------------- | ------------------------------------ |
 | `document_id` | 최상위 메타                               |
-| `chapter_id`  | 장 구분자                                |
+| `chapter_id`  | 장 구분자   / 기본장만 사용                             |
 | `segment`     | 숫자(ID)                               |
-| `section`     | 포함되는 최상위 section 제목                  |
+| `section`     | 포함되는 최상위 section 제목    , ANNEX, TABLE              |
 | `포함되는 하위 섹션`  | `sub_section` / `clause` / `item` 목록 |
 | `page(s)`     | 시작–끝 페이지                             |
 | `예상 토큰*`      | `cl100k_base` 기준 대략값                 |
@@ -86,17 +86,16 @@
 
 #### 6-2. Annex 예시
 
-| document\_id | chapter\_id | segment | section | 포함되는 하위 섹션                             | page(s) | 예상 토큰\* |
-| ------------ | ----------- | :-----: | ------- | -------------------------------------- | ------- | ------- |
-| UR           | Z10.4.ANNEX I       |  **1**  |  1. INTRODUCTION       |                  | 61      | ≈310    |
-| UR           | Z10.4.ANNEX I       |  **2**  |  2. PURPOSE AND PRINCIPLES (2.1 \~ 2.4)|  | 61–62   | ≈620    |
-| UR           | Z10.4.ANNEX I       |  **3**  | 3. TECHNICAL ASSESSMENT (3.1)   |         | 62–63   | ≈420    |
+| document_id | chapter_id | segment | section | 포함되는 하위 섹션 | page(s) | 예상 토큰* |
+|------------|------------|---------|---------|------------------|---------|-----------|
+| UR | Z10.4 | **1** | **ANNEX II (CSR) - Sheet 1** | Contents (목차) | 91 | ≈350 |
+| UR | Z10.4 | **2** | **ANNEX II (CSR) - Sheet 2** | Instructions | 92 | ≈280 |
+| UR | Z10.4 | **3** | **ANNEX II (CSR) - Sheet 3** | General Particulars | 93 | ≈320 |
+| UR | Z10.4 | **4** | **ANNEX II (CSR) - REPORTS** | Sheet 4 (TM1-DHT(CSR)), Notes | 94-95 | ≈650 |
+| UR | Z10.4 | **5** | **ANNEX II (CSR) - REPORTS** | Sheet 5 (TM2-DHT(CSR)(i)), Notes | 96-97 | ≈600 |
 
 ### 7. 지침과 다른 경우
 - 지침과 다른 경우 새로운 예시 제시시
 
 > \*토큰 수는 추정치이며 실제 파이프라인 결과와 ± 10 % 차이가 날 수 있습니다.
-
----
-
 
