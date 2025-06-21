@@ -18,7 +18,8 @@
 
 1.**섹션 분석** : 문서의 섹션 분류
 2.**섹션 범주** : 1, 2, 3,etc., Table I-IX과 같은 form_table,  ANNEX
-
+3.**하위 범주** : 하위범쥐 패턴분석,750토큰 미만이면 분류할 필요없음
+4.**배열 범주** : 그림, 표, 노트
 ### 1.2 적용 범위
 
 * **IACS 정식 발간물**: UR (Unified Requirements), PR (Procedural Requirements), UI (Unified Interpretations)
