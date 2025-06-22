@@ -1,0 +1,129 @@
+# JSON 세그멘테이션 요구사항 (업데이트됨)
+
+## 1. 기본 요구사항
+
+### 1.1 문서 분할 규칙
+- **분할 단위**: 서브섹션 단위로 분할
+- **세그멘테이션 기준**:
+  - 750 토큰 이하: 서브섹션들을 합침
+  - 750 토큰 초과: 분할
+  - 합칠 때는 같은 상위 섹션(parent section)에 속한 것들만 합침
+
+### 1.2 세그먼트 관리
+- 각 세그먼트는 **독립적인 객체**로 관리
+- 모든 세그먼트는 동일한 문서 메타데이터 포함
+
+### 1.3 테이블 처리
+- **content**에서 테이블 내용은 참조만 표시 (예: `[See table TBL_001]`)
+- 실제 테이블 데이터는 **tables** 배열에 구조화하여 저장
+- 테이블은 **Markdown 형식**으로 작성
+
+## 2. JSON 구조
+
+### 2.1 세그먼트 객체 필수 필드
+
+```json
+{
+  "segment_id": "{document_id}_고유 식별자",
+  "document_title": "전체 문서 제목",
+  "document_id": "문서 식별 번호",
+  "version": "버전 정보",
+  "parent_section": "상위 섹션",
+  "section_title": "현재 섹션 제목",
+  "subsections": ["포함된 서브섹션 목록"],
+  "content": "실제 텍스트 내용 (테이블 제외)",
+  "content_type": "body | enclosure",
+  "tables": [테이블 마크다운],
+  "figures": ["그림 정보"],
+  "notes": ["주석/각주 테이블 마크다운"],
+  "page_numbers": [페이지 번호 배열],
+  "sheet_numbers": [시트 번호 배열],
+  "token_count": 토큰 수,
+  "created_date": "생성 연도",
+  "document_type": "문서 유형",
+  "language": "언어 코드"
+}
+```
+
+### 2.2 content_type 필드 설명
+- **"body"**: 문서의 본문 내용
+- **"enclosure"**: 첨부자료, 부록, 별첨 등의 내용
+
+### 2.3 테이블 구조
+```json
+{
+  "table_id": "TBL_XXX_001",
+  "table_name": "테이블 제목",
+  "table_type": "embedded_table | measurement_form | data_entry_form | reference_table",
+  "markdown": "| 헤더1 | 헤더2 |\n|-------|-------|\n| 데이터1 | 데이터2 |"
+}
+```
+
+## 3. 마크다운 테이블 형식
+
+### 3.1 기본 테이블 형식
+```markdown
+| Column 1 | Column 2 | Column 3 |
+|----------|----------|----------|
+| Data 1   | Data 2   | Data 3   |
+| Data 4   | Data 5   | Data 6   |
+```
+
+### 3.2 복잡한 테이블 (다중 헤더)
+```markdown
+| MAIN HEADER ||| SUB HEADERS |||
+|-------------|---|---|----------|---|---|
+| Sub Col 1 | Sub Col 2 | Sub Col 3 | Sub Col 4 | Sub Col 5 | Sub Col 6 |
+| Data | Data | Data | Data | Data | Data |
+```
+
+## 4. 세그멘테이션 프로세스
+
+### 4.1 단계별 처리
+1. **문서 분석**: 전체 구조 파악
+2. **내용 분류**: body와 enclosure 구분
+3. **섹션 식별**: 상위 섹션과 서브섹션 구분
+4. **토큰 계산**: 각 서브섹션의 토큰 수 계산
+5. **그룹핑**: 같은 parent_section의 서브섹션들을 750 토큰 이하로 그룹화
+6. **세그먼트 생성**: 각 그룹을 독립적인 세그먼트로 생성
+
+### 4.2 content_type 분류 기준
+- **body**: 
+  - 문서의 주요 내용
+  - 규정, 절차, 설명 등
+  - 번호가 매겨진 조항들
+  - embeded table
+- **enclosure**:
+  - 첨부자료 (Attachment, Enclosure)
+  - 부록 (Appendix)
+  - 별첨 (Annex)
+  - 양식 (Forms)
+  - 참고자료
+
+### 4.3 주의사항
+- 최소 제목 단위로 분할
+- 내용을 모두 포함하는 상위 제목 식별
+- 세그먼트별로 테이블, 그림, 노트/풋노트 키 추가
+- 각 세그먼트는 독립적으로 이해 가능해야 함
+- content_type을 정확히 분류하여 검색 효율성 향상
+
+## 5. 출력 형식
+
+최종 출력은 세그먼트 객체들의 배열:
+```json
+[
+  {
+    "segment_id": "SEG_001",
+    "document_title": "...",
+    "document_id": "...",
+    "version": "...",
+    "content_type": "body",
+    ...
+  },
+  {
+    "segment_id": "{document_id}_002",
+    "content_type": "enclosure",
+    ...
+  }
+]
+```
