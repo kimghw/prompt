@@ -37,6 +37,7 @@
   "tables": [테이블 마크다운],
   "figures": ["그림 정보"],
   "notes": ["주석/각주 테이블 마크다운"],
+  "cross_references":["content 에서 언급한 외부 문서"]
   "page_numbers": [페이지 번호 배열],
   "sheet_numbers": [시트 번호 배열],
   "token_count": 토큰 수,
