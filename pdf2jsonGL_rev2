@@ -52,13 +52,21 @@
 ### 2.3 테이블 구조
 ```json
 {
-  "table_id": "TBL_XXX_001",
+  "table_id": "N",
   "table_name": "테이블 제목",
   "table_type": "embedded_table | measurement_form | data_entry_form | reference_table",
   "markdown": "| 헤더1 | 헤더2 |\n|-------|-------|\n| 데이터1 | 데이터2 |"
 }
 ```
-
+## 2.4 figures
+```json
+{
+  "figure_id": "N",
+  figure_name": "테이블 제목",
+  "url": "  ",
+  "description": "이 그림은 어떤... 그림입니다."
+}
+```
 ## 3. 마크다운 테이블 형식
 
 ### 3.1 기본 테이블 형식
