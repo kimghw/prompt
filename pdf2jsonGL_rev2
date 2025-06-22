@@ -30,6 +30,7 @@
   "version": "버전 정보",
   "parent_section": "상위 섹션",
   "section_title": "현재 섹션 제목",
+  "applicability" : "해당 조항의 적용 범위(선박종류, 건조시기, 발효시기, 선박 규모, 적용대상 등)
   "subsections": ["포함된 하위 서브섹션 목록/이름"],
   "content": "실제 텍스트 내용 (테이블 제외)",
   "content_type": "body | enclosure",
@@ -61,7 +62,7 @@
 ## 2.4 figures
 ```json
 {
-  "figure_id": "N",
+  "figure_id": "{document_id}_figure_N",
   figure_name": "테이블 제목",
   "url": "  ",
   "description": "이 그림은 어떤... 그림입니다."
@@ -71,6 +72,19 @@
 ```json
 {
   "contents": "이 그림은 어떤... 그림입니다."
+}
+
+## 2.6 applicability
+```json
+{
+  "effective_date": "2024-07-01",
+  "action_type": "contract",           // contract | installation | application
+  "ship_type": ["bulk carrier", "ore carrier"],
+  "size": { "length_m_min": 150 },
+  "equipment": ["EGCS"],
+  "service_category": null,            // PR 문서라면 "radio-inspection" 등
+  "optional": false,
+  "exclusion": ["LNG carrier"]
 }
 ## 3. 마크다운 테이블 형식
 
