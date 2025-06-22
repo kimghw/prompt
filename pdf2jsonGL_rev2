@@ -126,7 +126,7 @@
 ```json
 [
   {
-    "segment_id": "UR Z10.4_001",
+    "segment_id": "{document_id}_001",
     "document_title": "...",
     "document_id": "...",
     "version": "...",
