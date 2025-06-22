@@ -67,7 +67,7 @@
   "description": "이 그림은 어떤... 그림입니다."
 }
 ```
-## 2.5 note/footnote
+## 2.5 notes/footnote
 ```json
 {
   "contents": "이 그림은 어떤... 그림입니다."
