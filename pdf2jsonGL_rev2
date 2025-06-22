@@ -30,7 +30,7 @@
   "version": "버전 정보",
   "parent_section": "상위 섹션",
   "section_title": "현재 섹션 제목",
-  "subsections": ["포함된 서브섹션 목록"],
+  "subsections": ["포함된 하위 서브섹션 목록/이름"],
   "content": "실제 텍스트 내용 (테이블 제외)",
   "content_type": "body | enclosure",
   "tables": [테이블 마크다운],
