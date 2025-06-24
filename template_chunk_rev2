@@ -23,7 +23,7 @@
   "applicability": "적용 범위 정보",
   "subsections": ["포함된 하위 서브섹션 목록"],
   
-  "content": "실제 텍스트 내용 (테이블은 [See table A1_TBL_2_1] 형식으로 참조)",
+  "content": "실제 텍스트 내용, 마크다운/ 원본 그대로",
   "content_type": "body|enclosure",
   "tables": [/* 테이블 마크다운 배열 */],
   "figures": [/* 그림 정보 배열 */],
@@ -51,7 +51,7 @@
   "table_id": "{document_id}_TBL_{full_section_number}_{sequence}",
   "table_name": "테이블 제목",
   "table_type": "embedded_table|measurement_form|data_entry_form|reference_table",
-  "markdown": "| 헤더1 | 헤더2 |\n|-------|-------|\n| 데이터1 | 데이터2 |"
+  "table_content": "| 헤더1 | 헤더2 |\n|-------|-------|\n| 데이터1 | 데이터2 |"
 }
 ```
 예시: 
@@ -194,8 +194,6 @@
 ## 7. 주의사항
 - 최소 제목 단위로 분할
 - 각 세그먼트는 독립적으로 이해 가능해야 함
-- 테이블은 content에서 참조만, 실제 데이터는 tables 배열에 저장
 - 마크다운 형식으로 테이블 작성
 - 분할 시 never_split 항목은 반드시 보호
-- 참조는 type과 standard 명확히 구분
 - 연속된 세그먼트는 navigation으로 연결
