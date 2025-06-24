@@ -1,0 +1,204 @@
+# JSON Segmentation Requirements (Final Version)
+
+## 1. Core Principles
+- Segment by **3000 characters** at subsection level
+- Combine only subsections within the same parent section
+- Manage each segment as an independent object
+
+## 2. Segment Structure
+
+### 2.1 Required Fields
+```json
+{
+  "document_title": "Full document title",
+  "document_id": "Document identifier",
+  "version": "Version information",
+  
+  "segment_id": "{document_id}_unique_number",
+  "segment_type": "main_content|table|annex|form|note|formula|figure_reference",
+  
+  "section_title": "Current section title",
+  "parent_section": "Parent section",
+  "hierarchy_level": "number",
+  "applicability": "Scope of application",
+  "subsections": ["List of included subsections"],
+  
+  "content": "Actual text content (tables referenced as [See table A1_TBL_2_1])",
+  "content_type": "body|enclosure",
+  "tables": [/* Array of table markdown */],
+  "figures": [/* Array of figure information */],
+  "notes": ["Annotations/footnotes"],
+  "cross_references": [/* Detailed reference information */],
+  
+  "segment_navigation": {
+    "previous_segment": "A1_001",
+    "next_segment": "A1_003",
+    "is_continued": true,
+    "continuation_note": "Continued from previous segment"
+  },
+  
+  "sheet_numbers": ["A1", "A2"],
+  "char_count": 3000,
+  "created_date": "2024",
+  "document_type": "requirement",
+  "language": "en"
+}
+```
+
+### 2.2 Table Structure (ID Generation Rules Applied)
+```json
+{
+  "table_id": "{document_id}_TBL_{full_section_number}_{sequence}",
+  "table_name": "Table title",
+  "table_type": "embedded_table|measurement_form|data_entry_form|reference_table",
+  "markdown": "| Header1 | Header2 |\n|---------|----------|\n| Data1 | Data2 |"
+}
+```
+Example:
+- `full_section_number` uses the complete section number where the table is located
+- Dots (.) are converted to underscores (_)
+- Sequence numbers assigned in order of appearance within the section
+
+### 2.3 Figure Structure (ID Generation Rules Applied)
+```json
+{
+  "figure_id": "{document_id}_FIG_{section_number}_{sequence}",
+  "figure_name": "Figure title",
+  "url": "URL or path",
+  "description": "Figure description"
+}
+```
+Example: `"figure_id": "A1_FIG_3_2"` // Second figure in section 3 of document A1
+
+### 2.4 Detailed Cross References
+```json
+{
+  "cross_references": [
+    {
+      "type": "internal_section",
+      "reference_id": "A1.2",
+      "reference_text": "as given in A1.2"
+    },
+    {
+      "type": "ur_reference",
+      "reference_id": "UR W29",
+      "reference_text": "in accordance with UR W29"
+    },
+    {
+      "type": "recommendation",
+      "reference_id": "IACS Rec 10",
+      "reference_text": "IACS Recommendation No. 10"
+    }
+  ]
+}
+```
+
+### 2.5 Applicability
+```json
+{
+  "applicability": {
+    "applies_to": ["bulk carrier", "ore carrier"],
+    "excludes": ["LNG carrier"],
+    "conditions": {
+      "min_length_m": 150,
+      "equipment": ["EGCS"]
+    },
+    "effective_date": "2024-07-01"
+  }
+}
+```
+- Include applicability scope from parent levels
+
+## 3. Segmentation Rules
+
+### 3.1 Splitting Exceptions
+
+### Never Split:
+- **Formulas**: Mathematical formulas or calculations
+- **Single Tables**: Individual tables remain intact
+- **Code Blocks**: Programming code sections
+
+### Preferably Do Not Split:
+- **Lowest-level numbered lists**: Lists like 1.2.3, 2.2.3, 3.2.3...
+- **Definitions**: Term definition sections
+- **Procedural Steps**: Step 1, Step 2... sequences
+
+### Valid Split Boundaries:
+- **End of paragraphs**
+- **End of lowest-level sections**
+- **End of list items**
+
+### Segment/Section Combination
+- **Segment Combination**: Combine connected segments/sections if total is under 3000 characters
+- **Same Hierarchy Level Combination**: Combine 1 and 2 if their total is under 3000 characters; cannot combine if 1 is 2000 chars and 2.1 is 800 chars
+- **Small Sections**: Combine with next section or segment if under 1000 characters
+
+### 3.2 Segment Connection Information
+- Provide navigation information for content split across multiple segments
+- `is_continued`: Whether content continues to next segment
+- `continuation_note`: Continuity explanation (e.g., "Continued from previous segment")
+
+## 4. Content Classification
+
+### 4.1 Body (Main Content)
+- Primary document content
+- Regulations, procedures, explanations
+- Numbered clauses
+- Tables embedded in main text
+
+### 4.2 Enclosure (Attachments)
+- Attachment, Enclosure
+- Appendix, Annex
+- Forms
+- Reference materials
+
+## 5. Segmentation Process
+
+1. **Document Analysis**: Understand overall structure
+2. **Content Classification**: Distinguish body from enclosure
+3. **Token Calculation**: Calculate tokens for each subsection
+4. **Apply Splitting Rules**: Check never_split, prefer_not_split conditions
+5. **Grouping**: Group subsections with same parent_section under 750 tokens
+6. **ID Generation**: Assign IDs to tables and figures according to rules
+7. **Reference Extraction**: Extract and structure reference information from content
+8. **Connection Information**: Add navigation information between split segments
+9. **Segment Creation**: Create each group as an independent segment
+
+## 6. Output Format
+
+```json
+[
+  {
+    "segment_id": "A1_001",
+    "document_title": "...",
+    "content_type": "body",
+    "segment_navigation": {
+      "previous_segment": null,
+      "next_segment": "A1_002",
+      "is_continued": true,
+      "continuation_note": "Section continues in next segment"
+    },
+    // ... all required fields
+  },
+  {
+    "segment_id": "A1_002",
+    "content_type": "body",
+    "segment_navigation": {
+      "previous_segment": "A1_001",
+      "next_segment": "A1_003",
+      "is_continued": false,
+      "continuation_note": null
+    },
+    // ... all required fields
+  }
+]
+```
+
+## 7. Important Notes
+- Split at minimum title unit level
+- Each segment must be independently understandable
+- Tables are only referenced in content; actual data stored in tables array
+- Write tables in markdown format
+- Always protect never_split items during segmentation
+- Clearly distinguish reference types and standards
+- Connect consecutive segments through navigation
