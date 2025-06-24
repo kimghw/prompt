@@ -76,19 +76,23 @@
 {
   "cross_references": [
     {
-      "type": "internal",  // internal|external
-      "reference_id": "M35.2.1",
-      "reference_text": "See UR M35.2.1",
-      "standard": "IACS"  // IACS|ISO|SOLAS|IMO
+      "type": "internal_section",
+      "reference_id": "A1.2",
+      "reference_text": "as given in A1.2"
     },
     {
-      "type": "external",
-      "reference_id": "ISO 19019:2005",
-      "reference_text": "in accordance with ISO 19019:2005",
-      "standard": "ISO"
+      "type": "ur_reference",
+      "reference_id": "UR W29",
+      "reference_text": "in accordance with UR W29"
+    },
+    {
+      "type": "recommendation",
+      "reference_id": "IACS Rec 10",
+      "reference_text": "IACS Recommendation No. 10"
     }
   ]
 }
+
 ```
 
 ### 2.5 적용 범위 (applicability)
