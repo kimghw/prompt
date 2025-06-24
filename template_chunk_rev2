@@ -75,11 +75,7 @@
 - internal reference는 관련 id만 리스트로 관리
 ```json
 {
-  "cross_references": [
-    {
-      "type": "internal_section",
-      "reference_id": ["",""]
-    },
+  "cross_references": [ 
     {
       "type": "external_reference",
       "reference_id": "UR z29",
