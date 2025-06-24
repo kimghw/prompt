@@ -1,7 +1,7 @@
 # JSON 세그멘테이션 요구사항 (최종 보완)
 
 ## 1. 핵심 원칙
-- **750 토큰 기준**으로 서브섹션 단위 분할
+- **3000자 기준**으로 서브섹션 단위 분할
 - 같은 상위 섹션의 서브섹션들만 합침
 - 각 세그먼트는 독립적인 객체로 관리
 
@@ -38,7 +38,7 @@
   },
   
   "sheet_numbers": ["A1", "A2"],
-  "token_count": 750,
+  "char_count": 750,
   "created_date": "2024",
   "document_type": "requirement",
   "language": "en"
@@ -48,13 +48,17 @@
 ### 2.2 테이블 구조 (ID 생성 규칙 적용)
 ```json
 {
-  "table_id": "{document_id}_TBL_{section_number}_{sequence}",
+  "table_id": "{document_id}_TBL_{full_section_number}_{sequence}",
   "table_name": "테이블 제목",
   "table_type": "embedded_table|measurement_form|data_entry_form|reference_table",
   "markdown": "| 헤더1 | 헤더2 |\n|-------|-------|\n| 데이터1 | 데이터2 |"
 }
 ```
-예시: `"table_id": "A1_TBL_2_1"` // A1 문서의 2번 섹션 첫 번째 테이블
+예시: 
+- `full_section_number`는 테이블이 실제로 위치한 섹션의 전체 번호를 사용
+- 점(.)은 언더스코어(_)로 변환
+- 해당 섹션 내에서 나타나는 순서대로 sequence 번호 부여
+
 
 ### 2.3 그림 구조 (ID 생성 규칙 적용)
 ```json
