@@ -77,12 +77,10 @@
 {
   "cross_references": [ 
     {
-      "type": "external_reference",
       "reference_id": "UR z29",
       "reference_text": "in accordance with UR W29"
     },
     {
-      "type": "external_reference",
       "reference_id": "UR e29",
       "reference_text": "in accordance with UR W29"
     }
