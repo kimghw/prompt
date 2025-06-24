@@ -93,15 +93,18 @@
 
 ### 2.5 적용 범위 (applicability)
 ```json
+
+- 상위 레벨의 적용 범위를 포함
 {
-  "effective_date": "2024-07-01",
-  "action_type": "contract|installation|application",
-  "ship_type": ["bulk carrier", "ore carrier"],
-  "size": {"length_m_min": 150},
-  "equipment": ["EGCS"],
-  "service_category": null,
-  "optional": false,
-  "exclusion": ["LNG carrier"]
+  "applicability": {
+    "applies_to": ["bulk carrier", "ore carrier"],
+    "excludes": ["LNG carrier"],
+    "conditions": {
+      "min_length_m": 150,
+      "equipment": ["EGCS"]
+    },
+    "effective_date": "2024-07-01"
+  }
 }
 ```
 
